@@ -1,0 +1,43 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="mdtraj" />
+          <option value="mdanalysis" />
+          <option value="networkx" />
+          <option value="scikit-learn" />
+          <option value="numpy" />
+          <option value="scipy" />
+          <option value="matplotlib" />
+          <option value="seaborn" />
+          <option value="pyyaml" />
+          <option value="pandas" />
+          <option value="pytest" />
+          <option value="rdkit" />
+          <option value="openbabel" />
+          <option value="pillow" />
+          <option value="tqdm" />
+          <option value="jinja2" />
+          <option value="ipykernel" />
+          <option value="notebook" />
+          <option value="freetype" />
+          <option value="typer" />
+          <option value="rich" />
+          <option value="loguru" />
+          <option value="mols2grid" />
+          <option value="tabulate" />
+          <option value="openmm" />
+          <option value="cudatoolkit" />
+          <option value="openff-toolkit" />
+          <option value="openff-forcefields" />
+          <option value="ambertools" />
+          <option value="plip" />
+          <option value="dimorphite-dl" />
+          <option value="ipython" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
