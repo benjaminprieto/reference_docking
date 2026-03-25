@@ -1,0 +1,74 @@
+# =============================================================================
+# 01d Footprint Re-scoring - Configuration (DOCK6 engine)
+# =============================================================================
+# Re-scores existing DOCK6 poses with per-residue energy decomposition.
+# Reads scored mol2 from 01c, runs dock6 with fps_score_primary,
+# outputs mol2 with FPS_vdw, FPS_es, H-bond columns per residue.
+#
+# This is a POST-DOCKING step (no re-docking, orient_ligand=no).
+# Based on Rizzo Lab protocol and DOCK6 manual §2.11.9.
+#
+# v2.0 (2026-03-25): Added GB/SA Hawkins implicit solvation.
+#   Corrects in-vacuo electrostatic artifacts (e.g., charge-charge
+#   repulsion between ASP494 carboxylate and UDX phosphates that is
+#   screened by water in reality but not in grid/footprint scoring).
+#   GB/SA gives a GLOBAL solvation-corrected score per pose.
+#   Per-residue footprint remains in-vacuo (DOCK6 limitation).
+#
+# INPUT:  05_results/{campaign}/01c_dock6_run/{name}/{name}_scored.mol2
+# OUTPUT: 05_results/{campaign}/01d_footprint_rescore/{name}/{name}_fps_scored.mol2
+#
+# Project: reference_docking
+# Module: 01d (DOCK6)
+# Version: 2.0
+# =============================================================================
+
+parameters:
+  dock6_home: "/opt/dock6"
+  timeout_per_molecule: 300
+
+  # ┌───────────────────────────────────────────────────────────────┐
+  # │  GB/SA Hawkins — Implicit Solvation (secondary score)        │
+  # │                                                               │
+  # │  Adds Generalized Born / Surface Area solvation energy to    │
+  # │  the footprint rescore. Screens electrostatic interactions   │
+  # │  that are artificially strong in-vacuo.                      │
+  # │                                                               │
+  # │  Enable for: reference crystal analysis, charged pockets     │
+  # │  Disable for: fast screening (adds ~2-5x runtime)           │
+  # │                                                               │
+  # │  Can also enable via CLI: --gbsa-hawkins                     │
+  # └───────────────────────────────────────────────────────────────┘
+  gbsa_hawkins: false
+
+  # Solvent dielectric constant (78.5 = water at 25°C)
+  solvent_dielectric: 78.5
+
+  # Salt concentration in Molar (0.15 = physiological ~150mM NaCl)
+  salt_concentration: 0.15
+
+  # GB radius offset (default from DOCK6 manual)
+  gb_offset: 0.09
+
+  log_level: "INFO"
+
+outputs:
+  subdir: "01d_footprint_rescore"
+
+# =============================================================================
+# USAGE
+# =============================================================================
+#
+# Standard (in-vacuo footprint only):
+#   python 02_scripts/01d_footprint_rescore.py \
+#       --config 03_configs/01d_footprint_rescore.yaml \
+#       --campaign 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml
+#
+# With GB/SA Hawkins (implicit solvation):
+#   python 02_scripts/01d_footprint_rescore.py \
+#       --config 03_configs/01d_footprint_rescore.yaml \
+#       --campaign 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml \
+#       --gbsa-hawkins
+#
+# Or set gbsa_hawkins: true in this YAML for persistent activation.
+# =============================================================================

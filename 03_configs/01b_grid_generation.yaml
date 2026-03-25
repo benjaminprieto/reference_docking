@@ -1,0 +1,67 @@
+# =============================================================================
+# 01b Grid Generation - Configuration (DOCK6 engine)
+# =============================================================================
+# Generate DOCK6 grids (DMS → spheres → showbox → grid).
+#
+# INPUT:  Receptor mol2 from 00b, receptor noH PDB from 00b
+# OUTPUT: 05_results/{campaign_id}/01b_grid_generation/
+#
+# Project: reference_docking
+# Module: 01b (DOCK6)
+# Version: 3.0 — reference docking defaults (2026-03-25)
+# =============================================================================
+#
+# ┌─────────────────────────────────────────────────────────────────────┐
+# │  BOX_MARGIN for reference docking:                                  │
+# │                                                                     │
+# │  box_margin: 1.0  (tight box around crystal ligand coordinates)    │
+# │                                                                     │
+# │  This ensures the re-docked pose stays near the crystallographic   │
+# │  position, producing a meaningful footprint comparison.            │
+# └─────────────────────────────────────────────────────────────────────┘
+#
+
+parameters:
+  # DMS probe radius (Angstroms)
+  probe_radius: 1.4
+
+  # Tight box for reference docking (crystal ligand stays near its position)
+  box_margin: 1.0
+
+  # Grid spacing (Angstroms)
+  grid_spacing: 0.3
+
+  # Energy cutoff distance
+  energy_cutoff_distance: 9999.0
+
+  # VdW parameters
+  attractive_exponent: 6
+  repulsive_exponent: 12
+
+  # Dielectric constant factor
+  dielectric_factor: 4
+
+  # Bump overlap filter
+  bump_overlap: 0.75
+
+  # DOCK6 home (null = autodetect from /opt/dock6/)
+  # dock6_home: "/opt/dock6"
+
+  # Log level
+  log_level: "INFO"
+
+outputs:
+  subdir: "01b_grid_generation"
+
+# =============================================================================
+# USAGE
+# =============================================================================
+# python 02_scripts/01b_grid_generation.py \
+#     --config 03_configs/01b_grid_generation.yaml \
+#     --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
+#
+# Force regeneration:
+#   python 02_scripts/01b_grid_generation.py \
+#     --config 03_configs/01b_grid_generation.yaml \
+#     --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml --force
+# =============================================================================

@@ -1,0 +1,43 @@
+# =============================================================================
+# 00d Binding Site Definition - Configuration
+# =============================================================================
+# Identifica el binding site y recorta el receptor PDB para grid generation.
+#
+# Proteinas grandes (>3000 atomos) hacen que sphgen (Fortran) falle.
+# Este modulo recorta rec_noH.pdb a una esfera alrededor del binding site,
+# generando rec_noH_site.pdb que DMS/sphgen pueden manejar.
+#
+# El binding site se define en campaign_config.yaml (grids.binding_site).
+# Este archivo solo controla parametros algoritmicos.
+#
+# INPUT:  05_results/{campaign_id}/00b_receptor_preparation/rec_noH.pdb
+# OUTPUT: 05_results/{campaign_id}/00d_binding_site/
+#
+# Renumbered from 00e (2026-03-16).
+#
+# Project: reference_docking
+# Module: 00d
+# Version: 1.1
+# =============================================================================
+
+parameters:
+  # Distancia de contacto para method=reference_ligand (Angstroms)
+  contact_cutoff: 5.0
+
+  # Radio de recorte del PDB (Angstroms desde el centroide)
+  trim_radius: 25.0
+
+  # Mantener residuos completos en el PDB recortado
+  keep_whole_residues: true
+
+  # Log level
+  log_level: "INFO"
+
+outputs:
+  subdir: "00d_binding_site"
+
+# =============================================================================
+# USAGE
+# =============================================================================
+# python 02_scripts/00d_binding_site_definition.py --config 03_configs/00d_binding_site_definition.yaml --campaign 04_data/campaigns/example_campaign/campaign_config.yaml
+# =============================================================================

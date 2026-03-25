@@ -1,0 +1,30 @@
+# =============================================================================
+# 01e Score Collection - Configuration (DOCK6 engine)
+# =============================================================================
+# Collects DOCK6 docking scores, ranks molecules, and produces Excel/CSV.
+#
+# Extracts ALL fields from DOCK6 scored mol2 headers:
+#   Grid_Score, Grid_vdw_energy, Grid_es_energy, Internal_energy_repulsive,
+#   FPS_vdw, FPS_es (if 01d footprint was run),
+#   DOCK_Rotatable_Bonds, Formal_Charge, Heavy_Atoms, Molecular_Weight,
+#   HBond_Acceptors, HBond_Donors
+#
+# Merges SMILES from 00a unique_molecules.csv for downstream enrichment.
+#
+# INPUT:  05_results/{campaign_id}/01c_dock6_run/{name}/{name}_scored.mol2
+# OUTPUT: 05_results/{campaign_id}/01e_score_collection/
+#
+# Project: reference_docking
+# Module: 01e (DOCK6) — renumbered from 01d (2026-03-22)
+# Version: 3.0
+# =============================================================================
+
+parameters:
+  score_key: "Grid_Score"
+  max_molecules: 0
+  extract_best_pose_mol2: true
+  keep_all_poses: true
+  log_level: "INFO"
+
+outputs:
+  subdir: "01e_score_collection"

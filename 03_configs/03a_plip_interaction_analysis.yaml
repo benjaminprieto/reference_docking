@@ -1,0 +1,46 @@
+# =============================================================================
+# 03a PLIP Interaction Analysis - Configuration
+# =============================================================================
+# Analyze crystal protein-ligand interactions using PLIP.
+#
+# Uses protonated receptor (from 00b) and protonated ligand (from 00c)
+# at the correct docking pH. Combines into a complex PDB, runs PLIP.
+#
+# INPUT:
+#   Protonated receptor PDB (from 00b: receptor_protonated.pdb)
+#   Protonated ligand SDF/mol2 (from 00c: structures/pH{X}/{name}.sdf)
+#
+# OUTPUT: 05_results/{campaign_id}/03a_plip_analysis/
+#   interactions.json          — Standardized interaction data (v3.0)
+#   interactions_summary.csv   — One row per interaction
+#   interactions_summary.txt   — Human-readable summary
+#   complex_for_plip.pdb       — Combined receptor+ligand (intermediate)
+#   03a_plip_analysis.log
+#
+# Project: reference_docking
+# Module: 03a
+# Version: 1.0
+#
+# Dependencies: plip (conda install -c conda-forge plip)
+# =============================================================================
+
+parameters:
+
+  # Output filename base
+  output_name: "interactions"
+
+  log_level: "INFO"
+
+outputs:
+  subdir: "03a_plip_analysis"
+
+# =============================================================================
+# USAGE
+# =============================================================================
+#
+# With campaign (auto-resolves receptor from 00b + ligand from campaign):
+#   python 02_scripts/03a_plip_interaction_analysis.py \
+#       --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml \
+#       --config 03_configs/03a_plip_interaction_analysis.yaml
+#
+# =============================================================================

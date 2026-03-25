@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reference_docking"
+version = "1.0.0"
+description = "DOCK6 rigid re-docking of crystallographic ligands. Footprint-based validation for reference complexes."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9,<3.13"
+authors = [
+    {name = "Benjamin Prieto"},
+    {name = "Environ Bio"},
+]
+keywords = [
+    "reference-docking",
+    "dock6",
+    "crystallography",
+    "footprint-scoring",
+    "computational-chemistry",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: POSIX :: Linux",
+]
+
+# Core dependencies (pip-installable)
+# RDKit, OpenBabel, AmberTools -> install via conda (see environment.yaml)
+dependencies = [
+    "pandas>=1.5.0",
+    "numpy>=1.23.0",
+    "openpyxl>=3.0.0",
+    "pyyaml>=6.0",
+    "tqdm>=4.64.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[project.urls]
+Repository = "https://github.com/benjaminprieto/reference_docking"
+
+# --- Setuptools ---
+[tool.setuptools.packages.find]
+where = ["01_src"]
+
+[tool.setuptools.package-dir]
+"" = "01_src"
+
+# --- Pytest ---
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"

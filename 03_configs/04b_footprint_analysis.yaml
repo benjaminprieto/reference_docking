@@ -1,0 +1,60 @@
+# =============================================================================
+# 04b Footprint Analysis - Configuration (DOCK6 analysis)
+# =============================================================================
+# Phase 1: Re-score existing poses with footprint_similarity_score_primary
+#           (fast, seconds per molecule, no re-docking)
+# Phase 2: Parse per-residue vdW + ES, consensus, vs-reference comparison
+#
+# INPUT:  05_results/{campaign_id}/01c_dock6_run/{name}/{name}_scored.mol2
+#         05_results/{campaign_id}/00b_receptor_preparation/rec_charged.mol2
+#         05_results/{campaign_id}/01e_score_collection/best_poses/ (reference)
+# OUTPUT: 05_results/{campaign_id}/04_dock6_analysis/04b_footprint_rescore/
+#         05_results/{campaign_id}/04_dock6_analysis/04b_footprint_analysis/
+#
+# REFERENCE: Balius et al. J Chem Inf Model 2011, 51(8):1942-56
+#
+# Project: reference_docking
+# Module: 04b (DOCK6 analysis)
+# Version: 1.1 (2026-03-23) — path fix: 05_dock6 → 04_dock6_analysis
+# =============================================================================
+
+parameters:
+  # Fraction of molecules that must contact a residue for it to be
+  # classified as "pharmacophoric" (0.0 - 1.0)
+  pharmacophore_threshold: 0.8
+
+  # Minimum total energy for a residue to count as "contributing"
+  # (kcal/mol, must be more negative than this)
+  energy_cutoff: -0.5
+
+  # Timeout per molecule for DOCK6 re-scoring (seconds)
+  # Re-scoring is fast: typically 2-10 seconds per molecule
+  timeout: 120
+
+  # Override reference mol2 (null = auto-detect from 01d best_poses)
+  reference_mol2: null
+
+  log_level: "INFO"
+
+outputs:
+  rescore_subdir: "04_dock6_analysis/04b_footprint_rescore"
+  analysis_subdir: "04_dock6_analysis/04b_footprint_analysis"
+
+# =============================================================================
+# USAGE
+# =============================================================================
+# # Full pipeline (rescore + analyze):
+# python 02_scripts/04b_footprint_analysis.py \
+#     --config 03_configs/04b_footprint_analysis.yaml \
+#     --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
+#
+# # Phase 1 only (generate re-scoring inputs, test with --dry-run):
+# python 02_scripts/04b_footprint_analysis.py \
+#     --config 03_configs/04b_footprint_analysis.yaml \
+#     --campaign ... --rescore-only --dry-run
+#
+# # Phase 2 only (if re-scoring already done):
+# python 02_scripts/04b_footprint_analysis.py \
+#     --config 03_configs/04b_footprint_analysis.yaml \
+#     --campaign ... --analyze-only
+# =============================================================================

@@ -1,0 +1,102 @@
+# =============================================================================
+# 00b Receptor Preparation - Configuration
+# =============================================================================
+# Prepara el receptor para DOCK6: limpieza + protonacion + mol2 con cargas.
+#
+# Version 2.0 — ChimeraX backbone (2026-03-13)
+#
+# DOCK6 requiere:
+#   - rec_charged.mol2  (Sybyl atom types + AMBER ff14SB partial charges)
+#   - rec_noH.pdb       (sin H, para DMS surface en 01a)
+#
+# OPCIONAL: Si receptor.protonation.enabled=false en campaign_config,
+# este modulo se SALTA automaticamente.
+#
+# Si receptor.prepared_mol2 apunta a un mol2 existente, se usa directo.
+#
+# STRATEGIES:
+#   pdb2pqr  -> PDB2PQR + PROPKA pKa prediction + ChimeraX mol2 generation
+#               RECOMENDADA para docking a pH no-fisiologico (e.g. Golgi pH 6.3)
+#               His, Asp, Glu se protonan/deprotonan segun su pKa real
+#               Output: AMBER ff14SB charges + Sybyl types via ChimeraX
+#
+#   chimerax -> ChimeraX AddH + addcharge directo
+#               Buena para pH fisiologico (~7.2)
+#               HIS asignado por geometria local (H-bonding environment)
+#               Output: AMBER ff14SB charges + Sybyl types
+#
+#   obabel   -> OpenBabel -p pH: FALLBACK DE EMERGENCIA
+#               *** NO RECOMENDADA ***
+#               Gasteiger charges (menos preciso que AMBER ff14SB)
+#               Requiere post-procesamiento para DOCK6 compatibility
+#               Solo usar si ChimeraX no esta disponible
+#
+# REQUISITOS:
+#   - ChimeraX: /usr/bin/chimerax-daily (o en PATH)
+#   - PDB2PQR: pip install pdb2pqr (para strategy pdb2pqr)
+#   - OpenBabel: obabel (solo si strategy obabel)
+#
+# INPUT: campaign_config.receptor.pdb
+# OUTPUT: 05_results/{campaign_id}/00b_receptor_preparation/
+#
+# Project: reference_docking
+# Module: 00b
+# Version: 2.0
+# =============================================================================
+
+parameters:
+  # Herramienta de protonacion (override de campaign_config si se especifica)
+  # null = usar campaign_config.receptor.protonation.tool
+  # "pdb2pqr"  -> PDB2PQR+PROPKA + ChimeraX (RECOMENDADA)
+  # "chimerax" -> ChimeraX directo
+  # "obabel"   -> OpenBabel (NO RECOMENDADA)
+  protonation_tool: null
+
+  # Force field para PDB2PQR (solo aplica si tool=pdb2pqr)
+  # "AMBER"  -> AMBER ff94 charges (estandar DOCK6)
+  # "CHARMM" -> CHARMM 27 charges
+  # "PARSE"  -> Optimizado para calculo electrostatico (Poisson-Boltzmann)
+  force_field: "AMBER"
+
+  # Eliminar conformaciones alternativas (solo primera: altLoc '' o 'A')
+  remove_alt_conformations: true
+
+  # Log level
+  log_level: "INFO"
+
+# -----------------------------------------------------------------------------
+# OUTPUT
+# -----------------------------------------------------------------------------
+outputs:
+  subdir: "00b_receptor_preparation"
+
+  # Archivos generados:
+  #   rec_charged.mol2           -> DOCK6-ready (Sybyl types + AMBER ff14SB charges)
+  #   rec_noH.pdb                -> Sin H (para DMS surface en 01a)
+  #   receptor_clean.pdb         -> PDB limpio (sin agua, HETATM, alt conf)
+  #   chimerax.log               -> Log de ChimeraX (si aplica)
+  #   protonation_report.json    -> Reporte detallado (pKa, cargas, etc.)
+  #   protonation_summary.txt    -> Resumen legible
+  #   00b_receptor_preparation.log
+
+# =============================================================================
+# USAGE
+# =============================================================================
+# # Protonacion pH-aware (recomendada para Golgi targeting):
+# python 02_scripts/00b_receptor_preparation.py \
+#     --config 03_configs/00b_receptor_preparation.yaml \
+#     --campaign 04_data/campaigns/mi_campana/campaign_config.yaml \
+#     --ph 6.3 --tool pdb2pqr
+#
+# # ChimeraX directo (pH fisiologico):
+# python 02_scripts/00b_receptor_preparation.py \
+#     --config 03_configs/00b_receptor_preparation.yaml \
+#     --campaign 04_data/campaigns/mi_campana/campaign_config.yaml \
+#     --tool chimerax
+#
+# # Solo chain A:
+# python 02_scripts/00b_receptor_preparation.py \
+#     --config 03_configs/00b_receptor_preparation.yaml \
+#     --campaign 04_data/campaigns/mi_campana/campaign_config.yaml \
+#     --chain A
+# =============================================================================

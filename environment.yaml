@@ -1,0 +1,52 @@
+# =============================================================================
+# reference_docking — Conda Environment
+# =============================================================================
+#
+# INSTALACION:
+#   conda env create -f environment.yaml
+#   conda activate reference_docking_env
+#   pip install -e ".[dev]"
+#   bash check_dependencies.sh
+#
+# ACTUALIZACION:
+#   conda env update -f environment.yaml --prune
+#
+# DEPENDENCIAS EXTERNAS (no conda/pip):
+#   - DOCK6:    licencia academica gratuita de UCSF
+#               https://dock.compbio.ucsf.edu/DOCK_6/index.htm
+#   - ChimeraX: https://www.cgl.ucsf.edu/chimerax/download.html
+#               (necesario para 00b receptor preparation)
+#
+# =============================================================================
+
+name: reference_docking_env
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  # --- Python ---
+  - python>=3.9,<3.13
+
+  # --- Core ---
+  - pandas>=1.5
+  - numpy>=1.23
+  - openpyxl>=3.0
+  - pyyaml>=6.0
+  - tqdm>=4.64
+
+  # --- Cheminformatics ---
+  - rdkit>=2023.03.1
+  - openbabel>=3.1.1
+
+  # --- Structural biology ---
+  - ambertools>=22.0
+  - plip>=2.3.0
+
+  # --- Testing ---
+  - pytest>=7.0
+  - pytest-cov>=4.0
+
+  # --- pip-only ---
+  - pip
