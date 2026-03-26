@@ -397,7 +397,7 @@ def run_ligand_preparation(
         if not reference_mol2 or not Path(reference_mol2).exists():
             return {"success": False, "error": f"Reference mol2 not found: {reference_mol2}"}
         logger.info(f"  Source:      {Path(reference_mol2).name} + AM1-BCC injection")
-        # TODO: Run antechamber on copy, then inject charges
+        #TO:Run antechamber on copy, then inject charges
         result = {"success": False, "error": "inject strategy not yet implemented"}
 
     else:
