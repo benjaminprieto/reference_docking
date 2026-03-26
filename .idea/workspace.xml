@@ -4,7 +4,29 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e52ab46b-93f7-42a1-b34f-2f429c33d94e" name="Changes" comment="prrimer" />
+    <list default="true" id="e52ab46b-93f7-42a1-b34f-2f429c33d94e" name="Changes" comment="prrimer">
+      <change afterPath="$PROJECT_DIR$/01_src/reference_docking/m00_preparation/ligand_preparation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/gbsa_rescore.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/02_scripts/00a_ligand_preparation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/02_scripts/01f_gbsa_rescore.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/03_configs/00a_ligand_preparation.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/03_configs/01f_gbsa_rescore.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/campaign_config.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/grids/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/molecules/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/receptor/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/receptor/XT1_6EJ7.pdb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/reference/UDX.mol2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/reference/pharmit.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/01_src/reference_docking/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/01_src/reference_docking/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/01_src/reference_docking/m00_preparation/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/01_src/reference_docking/m00_preparation/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/dock6_runner.py" beforeDir="false" afterPath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/dock6_runner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/02_scripts/01c_dock6_run.py" beforeDir="false" afterPath="$PROJECT_DIR$/02_scripts/01c_dock6_run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/03_configs/01c_dock6_run.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/03_configs/01c_dock6_run.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_pipeline.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run_pipeline.sh" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -13,6 +35,12 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "benjaminprieto"
+  }
+}]]></component>
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
     "url": "https://github.com/benjaminprieto/reference_docking.git",
@@ -38,6 +66,7 @@
     "WebServerToolWindowPanel.toolwindow.show.permissions": "false",
     "WebServerToolWindowPanel.toolwindow.show.size": "false",
     "git-widget-placeholder": "master",
+    "last_opened_file_path": "C:/Users/benja/PycharmProjects/reference_docking/03_configs",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -47,6 +76,15 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\benja\PycharmProjects\reference_docking\03_configs" />
+      <recent name="C:\Users\benja\PycharmProjects\reference_docking\02_scripts" />
+      <recent name="C:\Users\benja\PycharmProjects\reference_docking\01_src\reference_docking\m01_docking" />
+      <recent name="C:\Users\benja\PycharmProjects\reference_docking\01_src\reference_docking\m00_preparation" />
+      <recent name="C:\Users\benja\PycharmProjects\reference_docking\04_data\campaign" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -62,7 +100,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1774473771985</updated>
-      <workItem from="1774473773018" duration="2889000" />
+      <workItem from="1774473773018" duration="5295000" />
     </task>
     <task id="LOCAL-00001" summary="prrimer">
       <option name="closed" value="true" />
@@ -72,7 +110,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774476384204</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="prrimer">
+      <option name="closed" value="true" />
+      <created>1774476689813</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1774476689813</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

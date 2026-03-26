@@ -1,0 +1,59 @@
+# =============================================================================
+# 01f GB/SA Hawkins Re-scoring - Configuration (Reference Docking)
+# =============================================================================
+# Re-scores DOCK6 poses with GB/SA Hawkins implicit solvation.
+# Runs as a SEPARATE step with gbsa_hawkins_score_primary=yes.
+#
+# DOCK6.13 ignores all _secondary score params during flex docking.
+# This module uses GB/SA as PRIMARY in a rigid rescore step.
+#
+# GB/SA corrects in-vacuo electrostatic artifacts where charged residues
+# show artificial repulsion without solvent screening (e.g., ASP494 COO⁻
+# near UDX PO₄²⁻ = +2.74 kcal/mol ES repulsion in vacuo).
+#
+# INPUT:  05_results/{campaign}/01c_dock6_run/{name}/{name}_scored.mol2
+# OUTPUT: 05_results/{campaign}/01f_gbsa_rescore/{name}/{name}_gbsa_scored.mol2
+#
+# Project: reference_docking
+# Module: 01f (DOCK6)
+# Version: 1.0 (2026-03-25)
+# =============================================================================
+
+parameters:
+  dock6_home: "/opt/dock6"
+  timeout_per_molecule: 600
+
+  # Simplex minimization before GB/SA scoring.
+  # DOCK6 docs recommend minimizing before GB/SA (sensitive to geometry).
+  # BUT minimizing moves the pose away from crystal coords.
+  # Default: false (pure crystal scoring). Set true for relaxed scoring.
+  minimize: false
+
+  # Solvent dielectric constant (78.5 = water at 25°C)
+  solvent_dielectric: 78.5
+
+  # Salt concentration in Molar (0.15 = physiological ~150mM NaCl)
+  salt_concentration: 0.15
+
+  # GB radius offset (DOCK6 default)
+  gb_offset: 0.09
+
+  log_level: "INFO"
+
+outputs:
+  subdir: "01f_gbsa_rescore"
+
+# =============================================================================
+# USAGE
+# =============================================================================
+# # Rigid (crystal coords, no minimization):
+# python 02_scripts/01f_gbsa_rescore.py \
+#     --config 03_configs/01f_gbsa_rescore.yaml \
+#     --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
+#
+# # With minimization (recommended by DOCK6 docs, but moves pose):
+# python 02_scripts/01f_gbsa_rescore.py \
+#     --config 03_configs/01f_gbsa_rescore.yaml \
+#     --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml \
+#     --minimize
+# =============================================================================

@@ -18,6 +18,7 @@
 #   01c  DOCK6 rigid re-docking (crystal ligand → scored poses)
 #   01d  Footprint rescore (re-score with fps_primary)
 #   01e  Score collection (parse → Excel)
+#   01f  GB/SA Hawkins rescore (implicit solvation, primary score)
 #   03a  PLIP interaction analysis (crystal complex → interaction JSON)
 #   04b  Footprint analysis (per-residue energy + consensus)
 # =============================================================================
@@ -72,6 +73,12 @@ python "$SCRIPTS/01d_footprint_rescore.py" \
 echo "[01e] Score Collection"
 python "$SCRIPTS/01e_score_collection.py" \
     --config "$CONFIGS/01e_score_collection.yaml" \
+    --campaign "$CAMPAIGN"
+
+# --- 01f: GB/SA Hawkins Re-scoring ---
+echo "[01f] GB/SA Hawkins Re-scoring"
+python "$SCRIPTS/01f_gbsa_hawkins_rescore.py" \
+    --config "$CONFIGS/01f_gbsa_hawkins_rescore.yaml" \
     --campaign "$CAMPAIGN"
 
 # --- 03a: PLIP Interaction Analysis ---

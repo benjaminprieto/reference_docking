@@ -1,0 +1,143 @@
+# =============================================================================
+# Campaign Configuration — example_campaign
+# =============================================================================
+# Source of truth for a docking campaign.
+#
+# A CAMPAIGN = one receptor + one set of molecules + docking conditions.
+#
+# Copy to 04_data/campaigns/{campaign_id}/ and edit.
+#
+# Project: molecular_docking
+# Version: 2.0 (2026-03-14)
+# =============================================================================
+
+# --- Identity ---
+campaign_id: "UDX_reference_pH63"
+description: "Example docking campaign"
+
+# --- Receptor ---
+receptor:
+  # Receptor PDB (relative to campaign directory)
+  pdb: "receptor/XT1_6EJ7.pdb"
+
+  # Chain(s) to keep (null = all)
+  chain: null
+
+  # Receptor protonation
+  # Strategies (v2.0 — ChimeraX backbone):
+  #   pdb2pqr  -> PDB2PQR+PROPKA + ChimeraX mol2 (RECOMMENDED)
+  #   chimerax -> ChimeraX DockPrep direct
+  #   obabel   -> OpenBabel fallback (NOT RECOMMENDED)
+  protonation:
+    enabled: true
+    tool: "pdb2pqr"
+    force_field: "AMBER"
+
+  # Pre-prepared mol2 (if you already have a DOCK6-ready receptor)
+  # Ignored when protonation.enabled=true.
+  prepared_mol2: null
+
+  # PDB cleanup options
+  remove_water: true
+  remove_hetatm: true
+
+# --- Docking pH ---
+# Affects protonation of receptor (if enabled) and ligands (if enabled).
+# Examples:
+#   7.2-7.4  -> physiological (cytoplasm)
+#   6.2-6.5  -> Golgi apparatus / early endosomes
+#   5.0-5.5  -> lysosomes / late endosomes
+#   4.5-5.0  -> stomach
+docking_ph: 6.3
+
+# --- Input molecules ---
+molecules:
+  # File or directory with molecules to dock
+  # Formats: SDF, CSV/XLSX, mol2, SMILES txt, mixed directory
+  # NOTE: only files to dock go here. Reference ligands go in reference/.
+  input_file: "molecules/"
+
+  # For CSV/XLSX: column names
+  name_column: "Name"
+  smiles_column: "Smile"
+
+  # For SDF: how to extract molecule name
+  # "header_first_word" = first word of header line
+  # "header_full"       = full header line
+  # "property"          = read from SDF property (see name_property)
+  name_source: "header_first_word"
+  name_property: "_Name"
+
+  # Ligand protonation
+  # Tools for small molecules:
+  #   obabel        -> OpenBabel -p pH (used by 00c)
+  #   dimorphite_dl -> Dimorphite-DL (more accurate, separate install)
+  # NOTE: pdb2pqr is for proteins, NOT for ligands.
+  protonation:
+    enabled: true
+    tool: "obabel"
+    obabel_fallback: true
+
+# --- DOCK6 grids ---
+grids:
+  # Directory with pre-existing grids (relative to campaign or absolute)
+  # If grids exist and are valid, 01a skips automatically.
+  grid_dir: "grids/"
+  spheres_file: "spheres_ligand.sph"
+  energy_grid: "ligand.nrg"
+  bump_grid: "ligand.bmp"
+
+  # Grid generation (if grids don't exist)
+  generate: true
+
+  # Binding site definition (only if generate=true)
+  # Methods:
+  #   reference_ligand -> spheres near a co-crystallized ligand (standard DOCK6)
+  #   residues         -> centroid of key residues (no ligand needed)
+  #   coordinates      -> explicit (x, y, z) point
+  binding_site:
+    method: "reference_ligand"
+
+    # Method A: reference_ligand
+    # IMPORTANT: use crystallographic coordinates (extracted from PDB),
+    # NOT regenerated from SMILES.
+    reference_mol2: "reference/UDX.mol2"
+
+    # Method B: residues (centroid computed automatically)
+    # residues:
+    #   - "GLU529"
+    #   - "TRP555"
+    #   - "CYS574"
+
+    # Method C: explicit coordinates
+    # center: [10.5, 15.2, 22.8]
+
+    # Sphere selection radius (Angstroms, all methods)
+    radius: 6.0
+
+# --- Docking engines ---
+# Engines to run. Comment out to skip.
+# docking:
+#   engines:
+#     - dock6
+#     - vina
+
+# --- Vina settings (for future 01c) ---
+# vina:
+#   exhaustiveness: 32
+#   num_modes: 20
+#   energy_range: 3.0
+
+# --- Output ---
+output:
+  # Excel filename (compatible with dock2profile)
+  scores_filename: "dock6_scores.xlsx"
+
+  # Directory for best pose mol2 files
+  mol2_dirname: "best_poses"
+
+# --- Traceability metadata ---
+metadata:
+  source: null
+  date: null
+  notes: null

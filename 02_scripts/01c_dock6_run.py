@@ -156,7 +156,7 @@ def main():
     timeout_per_molecule = params.get("timeout_per_molecule", 600)
     log_level = params.get("log_level", "INFO")
 
-    # Extra DOCK6 params
+    # Extra DOCK6 params (grid scoring + minimization only, no secondary scores)
     extra_params = {}
     for key in ["min_anchor_size", "pruning_max_orients", "pruning_clustering_cutoff",
                 "pruning_conformer_score_cutoff", "simplex_max_cycles",
@@ -164,24 +164,9 @@ def main():
                 "simplex_trans_step", "simplex_rot_step", "simplex_tors_step",
                 "simplex_random_seed",
                 "num_final_scored_poses", "num_preclustered_conformers",
-                "write_orientations", "compute_footprint_score",
-                "gbsa_hawkins", "solvent_dielectric", "salt_concentration", "gb_offset"]:
+                "write_orientations"]:
         if key in params:
             extra_params[key] = params[key]
-
-    # Receptor mol2 (for footprint scoring)
-    receptor_mol2 = None
-    rec_mol2_path = Path("05_results") / campaign_id / "00b_receptor_preparation" / "rec_charged.mol2"
-    if rec_mol2_path.exists():
-        receptor_mol2 = str(rec_mol2_path.resolve())
-
-    # Reference mol2 (for footprint comparison — crystallographic ligand)
-    reference_mol2 = None
-    ref_mol2_cfg = cc.get("reference_mol2")
-    if ref_mol2_cfg:
-        ref_mol2_path = Path(ref_mol2_cfg) if Path(ref_mol2_cfg).is_absolute() else campaign_dir / ref_mol2_cfg
-        if ref_mol2_path.exists():
-            reference_mol2 = str(ref_mol2_path.resolve())
 
     # CLI overrides
     if args.method:
@@ -231,14 +216,7 @@ def main():
     logger.info(f"Minimize:      {minimize} (max iter: {simplex_max_iterations})")
     logger.info(f"Poses:         {num_scored_conformers}")
     logger.info(f"Timeout:       {timeout_per_molecule}s per molecule")
-    if receptor_mol2:
-        logger.info(f"Receptor mol2: {Path(receptor_mol2).name}")
-    if reference_mol2:
-        logger.info(f"Reference:     {Path(reference_mol2).name} (footprint)")
-    else:
-        logger.info("Reference:     None (no footprint scoring)")
-    if extra_params.get("gbsa_hawkins"):
-        logger.info(f"GB/SA Hawkins: YES (dielectric={extra_params.get('solvent_dielectric', 78.5)}, salt={extra_params.get('salt_concentration', 0.15)}M)")
+    logger.info("Scoring:       grid_score primary only (01d=footprint, 01f=GBSA rescore later)")
     if molecule_filter:
         logger.info(f"Filter:        {molecule_filter}")
     if args.dry_run:
@@ -256,8 +234,6 @@ def main():
         simplex_max_iterations=simplex_max_iterations,
         timeout_per_molecule=timeout_per_molecule,
         molecule_filter=molecule_filter,
-        receptor_mol2=receptor_mol2,
-        reference_mol2=reference_mol2,
         dry_run=args.dry_run,
         **extra_params,
     )

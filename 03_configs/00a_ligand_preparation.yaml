@@ -1,0 +1,41 @@
+# =============================================================================
+# 00a Ligand Preparation - Configuration (Reference Docking)
+# =============================================================================
+# Prepares crystallographic ligand for DOCK6 reference scoring.
+# Preserves crystal coordinates exactly.
+#
+# Strategies:
+#   direct  — Use reference mol2 as-is (has H + Gasteiger charges)
+#   extract — Extract HETATM from PDB with ChimeraX + protonate
+#   inject  — AM1-BCC charges from antechamber injected into crystal coords
+#
+# INPUT:  campaign_dir/reference/*.mol2 (or PDB for extract strategy)
+# OUTPUT: 05_results/{campaign}/00a_ligand_preparation/{name}.mol2
+#
+# Project: reference_docking
+# Module: 00a
+# Version: 1.0 (2026-03-25)
+# =============================================================================
+
+parameters:
+  # Strategy for ligand preparation
+  # "direct"  — use reference mol2 directly (default, safest)
+  # "extract" — extract from PDB with ChimeraX + obabel protonation
+  # "inject"  — AM1-BCC charges injected into crystal coords (most accurate)
+  strategy: "direct"
+
+  # Ligand residue name in PDB (for extraction and validation)
+  ligand_name: "UDX"
+
+  log_level: "INFO"
+
+outputs:
+  subdir: "00a_ligand_preparation"
+
+# =============================================================================
+# USAGE
+# =============================================================================
+# python 02_scripts/00a_ligand_preparation.py \
+#     --config 03_configs/00a_ligand_preparation.yaml \
+#     --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
+# =============================================================================

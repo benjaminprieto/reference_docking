@@ -54,7 +54,14 @@ logger = logging.getLogger(__name__)
 
 
 # =============================================================================
-# DOCK6 INPUT TEMPLATES
+# DOCK6 INPUT TEMPLATES — DOCK6.13 COMPATIBLE
+# =============================================================================
+# DOCK6.13 silently ignores all _secondary scoring functions during
+# flexible docking. These templates use ONLY grid_score_primary for
+# the docking step. Footprint and GB/SA Hawkins are run as separate
+# rescore passes (01d, 01f) with their own _primary score.
+#
+# Reference: DOCK6.13 manual, §2.11 (Scoring Functions)
 # =============================================================================
 
 DOCK6_FLEX_TEMPLATE = """\
@@ -88,23 +95,11 @@ use_ligand_spheres                                           no
 bump_filter                                                  no
 score_molecules                                              yes
 contact_score_primary                                        no
-contact_score_secondary                                      no
 grid_score_primary                                           yes
-grid_score_secondary                                         no
 grid_score_rep_rad_scale                                     1
 grid_score_vdw_scale                                         1
 grid_score_es_scale                                          1
 grid_score_grid_prefix                                       {grid_prefix}
-multigrid_score_secondary                                    no
-dock3.5_score_secondary                                      no
-continuous_score_secondary                                   no
-{footprint_block}
-pharmacophore_score_secondary                                no
-descriptor_score_secondary                                   no
-gbsa_zou_score_secondary                                     no
-{gbsa_hawkins_block}
-SASA_score_secondary                                         no
-amber_score_secondary                                        no
 minimize_ligand                                              {minimize}
 simplex_max_iterations                                       {simplex_max_iterations}
 simplex_tors_premin_iterations                               0
@@ -149,23 +144,11 @@ use_ligand_spheres                                           no
 bump_filter                                                  no
 score_molecules                                              yes
 contact_score_primary                                        no
-contact_score_secondary                                      no
 grid_score_primary                                           yes
-grid_score_secondary                                         no
 grid_score_rep_rad_scale                                     1
 grid_score_vdw_scale                                         1
 grid_score_es_scale                                          1
 grid_score_grid_prefix                                       {grid_prefix}
-multigrid_score_secondary                                    no
-dock3.5_score_secondary                                      no
-continuous_score_secondary                                   no
-{footprint_block}
-pharmacophore_score_secondary                                no
-descriptor_score_secondary                                   no
-gbsa_zou_score_secondary                                     no
-{gbsa_hawkins_block}
-SASA_score_secondary                                         no
-amber_score_secondary                                        no
 minimize_ligand                                              {minimize}
 simplex_max_iterations                                       {simplex_max_iterations}
 simplex_max_cycles                                           {simplex_max_cycles}
@@ -318,6 +301,8 @@ def generate_dock6_input(
     template = DOCK6_FLEX_TEMPLATE if search_method == "flex" else DOCK6_RIGID_TEMPLATE
 
     # Build template variables with defaults
+    # NOTE: DOCK6.13 ignores all _secondary scoring functions during docking.
+    # Footprint and GB/SA Hawkins are run as separate rescore passes (01d, 01f).
     template_vars = {
         # Paths
         "ligand_mol2": ligand_mol2,
@@ -345,10 +330,6 @@ def generate_dock6_input(
         "simplex_rot_step": 0.1,
         "simplex_tors_step": 10.0,
         "simplex_random_seed": 0,
-        # Footprint (per-residue energy decomposition)
-        "footprint_block": "footprint_similarity_score_secondary                         no",
-        # GB/SA Hawkins implicit solvation (secondary score)
-        "gbsa_hawkins_block": "gbsa_hawkins_score_secondary                                 no",
         # Output
         "num_scored_conformers": 20,
         "num_final_scored_poses": 100,
@@ -356,61 +337,20 @@ def generate_dock6_input(
         "write_orientations": "no",
     }
 
-    # Apply kwargs overrides
+    # Apply kwargs overrides (ignore scoring params handled by rescore steps)
+    ignore_keys = {"receptor_mol2", "reference_mol2", "compute_footprint_score",
+                   "gbsa_hawkins", "solvent_dielectric", "salt_concentration", "gb_offset"}
     for key, val in kwargs.items():
+        if key in ignore_keys:
+            continue
         if key in template_vars:
-            # Convert booleans to DOCK6 yes/no
             if isinstance(val, bool):
                 val = "yes" if val else "no"
             template_vars[key] = val
 
-    # Handle footprint scoring
-    receptor_mol2 = kwargs.pop("receptor_mol2", None)
-    reference_mol2 = kwargs.pop("reference_mol2", None)
-    compute_footprint = kwargs.pop("compute_footprint_score", False)
-    if compute_footprint and receptor_mol2 and reference_mol2:
-        template_vars["footprint_block"] = (
-            "footprint_similarity_score_secondary                         yes\n"
-            f"fps_score_use_footprint_reference_mol2                       yes\n"
-            f"fps_score_footprint_reference_mol2_filename                  {reference_mol2}\n"
-            "fps_score_foot_compare_type                                  Euclidean\n"
-            "fps_score_normalize_foot                                     no\n"
-            "fps_score_foot_comp_all_residue                              yes\n"
-            f"fps_score_receptor_filename                                  {receptor_mol2}\n"
-            "fps_score_vdw_att_exp                                        6\n"
-            "fps_score_vdw_rep_exp                                        9\n"
-            "fps_score_vdw_rep_rad_scale                                  1\n"
-            "fps_score_use_distance_dependent_dielectric                  yes\n"
-            "fps_score_dielectric                                         4.0\n"
-            "fps_score_vdw_fp_scale                                       1\n"
-            "fps_score_es_fp_scale                                        1\n"
-            "fps_score_hb_fp_scale                                        0"
-        )
-
-    # Handle GB/SA Hawkins implicit solvation (secondary score)
-    gbsa_hawkins = kwargs.pop("gbsa_hawkins", False)
-    gbsa_solvent_dielectric = kwargs.pop("solvent_dielectric", 78.5)
-    gbsa_salt_concentration = kwargs.pop("salt_concentration", 0.15)
-    gbsa_gb_offset = kwargs.pop("gb_offset", 0.09)
-    if gbsa_hawkins and receptor_mol2:
-        template_vars["gbsa_hawkins_block"] = (
-            "gbsa_hawkins_score_secondary                                 yes\n"
-            f"gbsa_hawkins_score_rec_filename                              {receptor_mol2}\n"
-            f"gbsa_hawkins_score_solvent_dielectric                        {gbsa_solvent_dielectric}\n"
-            f"gbsa_hawkins_score_salt_conc                                 {gbsa_salt_concentration}\n"
-            f"gbsa_hawkins_score_gb_offset                                 {gbsa_gb_offset}\n"
-            "gbsa_hawkins_score_cont_vdw_and_es                           yes\n"
-            "gbsa_hawkins_score_vdw_att_exp                               6\n"
-            "gbsa_hawkins_score_vdw_rep_exp                               12"
-        )
-
     # Handle 'minimize' bool -> string
     if isinstance(template_vars["minimize"], bool):
         template_vars["minimize"] = "yes" if template_vars["minimize"] else "no"
-    elif template_vars["minimize"] is True:
-        template_vars["minimize"] = "yes"
-    elif template_vars["minimize"] is False:
-        template_vars["minimize"] = "no"
 
     if isinstance(template_vars["write_orientations"], bool):
         template_vars["write_orientations"] = "yes" if template_vars["write_orientations"] else "no"
@@ -457,8 +397,6 @@ def _setup_mol_symlinks(
         spheres_file: str,
         grid_prefix: str,
         dock6_params: Dict[str, str],
-        receptor_mol2: Optional[str] = None,
-        reference_mol2: Optional[str] = None,
 ) -> Dict[str, str]:
     """
     Create symlinks in the molecule output directory for all files
@@ -496,18 +434,6 @@ def _setup_mol_symlinks(
             short_names[key] = link_name
         else:
             short_names[key] = src
-
-    # Receptor mol2 (for footprint scoring)
-    if receptor_mol2 and Path(receptor_mol2).exists():
-        rec_name = Path(receptor_mol2).name
-        _create_symlink(receptor_mol2, mol_out / rec_name)
-        short_names["receptor_mol2"] = rec_name
-
-    # Reference mol2 (for footprint comparison)
-    if reference_mol2 and Path(reference_mol2).exists():
-        ref_name = "fps_reference.mol2"
-        _create_symlink(reference_mol2, mol_out / ref_name)
-        short_names["reference_mol2"] = ref_name
 
     return short_names
 
@@ -611,30 +537,32 @@ def run_dock6_batch(
         spheres_file: Union[str, Path],
         grid_prefix: str,
         output_dir: Union[str, Path],
-        search_method: str = "flex",
+        search_method: str = "rigid",
         max_orientations: int = 1000,
         num_scored_conformers: int = 20,
         minimize: bool = True,
         simplex_max_iterations: int = 500,
         timeout_per_molecule: int = 600,
         molecule_filter: Optional[List[str]] = None,
-        receptor_mol2: Optional[str] = None,
-        reference_mol2: Optional[str] = None,
         dry_run: bool = False,
         **kwargs,
 ) -> Dict[str, Any]:
     """
-    Run DOCK6 for all prepared ligands in a directory.
+    Run DOCK6 for all ligands in a directory (grid_score primary only).
 
     Scans ligand_mol2_dir for *.mol2 files. For each, generates a
-    dock6.in and executes dock6.
+    dock6.in with grid_score_primary and executes dock6.
+
+    DOCK6.13 note: secondary scoring functions are ignored during docking.
+    Footprint (01d) and GB/SA Hawkins (01f) are run as separate rescore
+    passes with their own primary score.
 
     Args:
-        ligand_mol2_dir: Directory with prepared mol2 files (from 00c)
+        ligand_mol2_dir: Directory with mol2 files (crystallographic ligands)
         spheres_file: Path to spheres_ligand.sph
         grid_prefix: Grid prefix (without .nrg/.bmp)
         output_dir: Directory for docking output
-        search_method: "flex" | "rigid"
+        search_method: "flex" | "rigid" (default: rigid for reference)
         max_orientations: Maximum orientations
         num_scored_conformers: Legacy param (DOCK6 <6.13). Also set via kwargs:
             num_final_scored_poses (default 100) and
@@ -721,8 +649,6 @@ def run_dock6_batch(
             spheres_file=spheres_file,
             grid_prefix=grid_prefix,
             dock6_params=dock6_params,
-            receptor_mol2=receptor_mol2,
-            reference_mol2=reference_mol2,
         )
 
         # --- Generate input file with short filenames ---
@@ -743,8 +669,6 @@ def run_dock6_batch(
             num_scored_conformers=num_scored_conformers,
             minimize=minimize,
             simplex_max_iterations=simplex_max_iterations,
-            receptor_mol2=short.get("receptor_mol2"),
-            reference_mol2=short.get("reference_mol2"),
             **kwargs,
         )
 

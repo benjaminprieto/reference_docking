@@ -1,31 +1,37 @@
 # =============================================================================
-# 01c DOCK6 Run - Configuration (Rigid Re-Docking)
+# 01c DOCK6 Run - Configuration (Reference Docking)
 # =============================================================================
-# Runs DOCK6 rigid re-docking for crystallographic ligands.
+# DOCK6 docking with grid_score as primary scoring.
+#
+# For reference docking: rigid method with tight box (1.0Å from 01b).
+# Can also use flex for comparison (anchor-and-grow with tight box).
+#
+# NOTE: GB/SA solvation is handled by 01f (separate rescore step).
+# DOCK6.13 ignores all _secondary score params during flex docking.
 #
 # OUTPUT: 05_results/{campaign_id}/01c_dock6_run/
 #
 # Project: reference_docking
-# Module: 01c (DOCK6 rigid)
-# Version: 5.0 — reference docking defaults (2026-03-25)
-#
-# CHANGES v4.3 → v5.0:
-#   - Default search_method: rigid (was flex)
-#   - Default gbsa_hawkins: true (reference complexes benefit from solvation)
-#   - Removed anchor-and-grow params (not used in rigid mode)
+# Module: 01c (DOCK6)
+# Version: 5.1 — clean for DOCK6.13 (2026-03-25)
 # =============================================================================
 
 parameters:
+  # "rigid" for pure crystal scoring, "flex" for conformational exploration
   search_method: "rigid"
 
   # --- Sampling ---
   max_orientations: 5000
 
+  # --- Anchor-and-grow (only used when search_method: flex) ---
+  min_anchor_size: 5
+  pruning_max_orients: 1000
+  pruning_clustering_cutoff: 2.0
+  pruning_conformer_score_cutoff: 100.0
+
   # --- Output poses ---
-  # DOCK6 6.13 params:
   num_final_scored_poses: 100
   num_preclustered_conformers: 500
-  # Legacy param (DOCK6 <6.13 fallback):
   num_scored_conformers: 100
 
   # --- Minimization ---
@@ -38,17 +44,6 @@ parameters:
   simplex_rot_step: 0.1
   simplex_tors_step: 10.0
   simplex_random_seed: -1
-
-  # --- Footprint Scoring (per-residue energy decomposition) ---
-  compute_footprint_score: true
-
-  # --- GB/SA Hawkins — Implicit Solvation (secondary score) ---
-  # Enabled by default for reference docking: corrects in-vacuo
-  # electrostatic artifacts for charged residues in crystal complexes.
-  gbsa_hawkins: true
-  solvent_dielectric: 78.5
-  salt_concentration: 0.15
-  gb_offset: 0.09
 
   # --- Output ---
   write_orientations: false
