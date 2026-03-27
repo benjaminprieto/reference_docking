@@ -38,9 +38,9 @@ outputs:
 # USAGE
 # =============================================================================
 #
-# With campaign (auto-resolves receptor from 00b + ligand from campaign):
+# With campaigns (auto-resolves receptor from 00b + ligand from campaigns):
 #   python 02_scripts/03a_plip_interaction_analysis.py \
-#       --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml \
+#       --campaigns 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml \
 #       --config 03_configs/03a_plip_interaction_analysis.yaml
 #
 # =============================================================================

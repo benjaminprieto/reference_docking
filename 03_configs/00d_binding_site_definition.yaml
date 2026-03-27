@@ -39,5 +39,5 @@ outputs:
 # =============================================================================
 # USAGE
 # =============================================================================
-# python 02_scripts/00d_binding_site_definition.py --config 03_configs/00d_binding_site_definition.yaml --campaign 04_data/campaigns/example_campaign/campaign_config.yaml
+# python 02_scripts/00d_binding_site_definition.py --config 03_configs/00d_binding_site_definition.yaml --campaigns 04_data/campaigns/example_campaign/campaign_config.yaml
 # =============================================================================

@@ -13,7 +13,7 @@ Input:
     00b_receptor_preparation/rec_noH.pdb       (for residue mapping)
 
 Output:
-    05_results/{campaign}/04_dock6_analysis/04b_footprint_analysis/
+    05_results/{campaigns}/04_dock6_analysis/04b_footprint_analysis/
 
 Project: reference_docking
 Module: 04b (DOCK6 analysis)
@@ -52,7 +52,7 @@ def main():
         description="04b DOCK6 Footprint Analysis — per-residue energy with PDB numbering",
     )
     parser.add_argument("--config", "-c", type=str, help="Module config YAML")
-    parser.add_argument("--campaign", type=str, help="Campaign config YAML")
+    parser.add_argument("--campaigns", type=str, help="Campaign config YAML")
     parser.add_argument("--output", "-o", type=str, default=None)
     parser.add_argument("--log-level", type=str, default=None)
 
@@ -69,9 +69,9 @@ def main():
     log_level = "INFO"
 
     # --- Campaign config ---
-    if args.campaign:
-        cc = load_yaml(args.campaign)
-        campaign_dir = Path(args.campaign).parent
+    if args.campaigns:
+        cc = load_yaml(args.campaigns)
+        campaign_dir = Path(args.campaigns).parent
         campaign_id = cc.get("campaign_id", campaign_dir.name)
 
         base = Path("05_results") / campaign_id
@@ -116,7 +116,7 @@ def main():
     setup_log_file(Path(analysis_dir) / "04b_footprint_analysis.log", log_level)
 
     logger.info("=" * 60)
-    logger.info("  MOLECULAR_DOCKING - Module 04b: DOCK6 Footprint Analysis")
+    logger.info("  REFERENCE_DOCKING - Module 04b: DOCK6 Footprint Analysis")
     logger.info("=" * 60)
     logger.info(f"  Campaign:      {campaign_id}")
     logger.info(f"  Footprint dir: {rescore_dir} (from 01d)")
@@ -139,7 +139,7 @@ def main():
 
     logger.info(f"\nNext: python 02_scripts/04c_binding_modes.py "
                 f"--config 03_configs/04c_binding_modes.yaml "
-                f"--campaign {args.campaign or '<campaign_config.yaml>'}")
+                f"--campaigns {args.campaigns or '<campaign_config.yaml>'}")
     return 0
 
 

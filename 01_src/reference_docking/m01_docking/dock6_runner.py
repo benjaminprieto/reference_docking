@@ -584,7 +584,8 @@ def run_dock6_batch(
 
     # --- Validate prerequisites ---
     if not ligand_dir.exists():
-        logger.error(f"Ligand directory not found: {ligand_dir}")        logger.error("Check ligand_mol2 path in campaign_config.yaml.")
+        logger.error(f"Ligand directory not found: {ligand_dir}")
+        logger.error("Check ligand_mol2 path in campaign_config.yaml.")
         return {"n_total": 0, "n_ok": 0, "n_failed": 0, "error": "Ligand dir not found"}
 
     grid_errors = validate_grids(spheres_file, grid_prefix)

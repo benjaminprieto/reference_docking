@@ -5,9 +5,9 @@
 Analyze crystal protein-ligand interactions using PLIP.
 
 Usage:
-    # With campaign (auto-resolves paths):
+    # With campaigns (auto-resolves paths):
     python 02_scripts/03a_plip_interaction_analysis.py \
-        --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml \
+        --campaigns 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml \
         --config 03_configs/03a_plip_interaction_analysis.yaml
 
 Project: reference_docking
@@ -62,7 +62,7 @@ def main():
                         help="Name for the ligand (default: filename stem)")
 
     # Campaign mode
-    parser.add_argument("--campaign", type=str, default=None)
+    parser.add_argument("--campaigns", type=str, default=None)
     parser.add_argument("--config", "-c", type=str, default=None)
 
     # Output
@@ -93,9 +93,9 @@ def main():
     ligand_name = args.ligand_name
     output_dir = args.output
 
-    if args.campaign:
-        cc = load_yaml(args.campaign)
-        campaign_dir = Path(args.campaign).parent
+    if args.campaigns:
+        cc = load_yaml(args.campaigns)
+        campaign_dir = Path(args.campaigns).parent
         campaign_id = cc.get("campaign_id", campaign_dir.name)
         results_base = Path("05_results") / campaign_id
         docking_ph = cc.get("docking_ph", 7.2)

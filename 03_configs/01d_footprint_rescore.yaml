@@ -15,8 +15,8 @@
 #   GB/SA gives a GLOBAL solvation-corrected score per pose.
 #   Per-residue footprint remains in-vacuo (DOCK6 limitation).
 #
-# INPUT:  05_results/{campaign}/01c_dock6_run/{name}/{name}_scored.mol2
-# OUTPUT: 05_results/{campaign}/01d_footprint_rescore/{name}/{name}_fps_scored.mol2
+# INPUT:  05_results/{campaigns}/01c_dock6_run/{name}/{name}_scored.mol2
+# OUTPUT: 05_results/{campaigns}/01d_footprint_rescore/{name}/{name}_fps_scored.mol2
 #
 # Project: reference_docking
 # Module: 01d (DOCK6)
@@ -62,12 +62,12 @@ outputs:
 # Standard (in-vacuo footprint only):
 #   python 02_scripts/01d_footprint_rescore.py \
 #       --config 03_configs/01d_footprint_rescore.yaml \
-#       --campaign 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml
+#       --campaigns 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml
 #
 # With GB/SA Hawkins (implicit solvation):
 #   python 02_scripts/01d_footprint_rescore.py \
 #       --config 03_configs/01d_footprint_rescore.yaml \
-#       --campaign 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml \
+#       --campaigns 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml \
 #       --gbsa-hawkins
 #
 # Or set gbsa_hawkins: true in this YAML for persistent activation.

@@ -26,7 +26,7 @@ Output: 05_results/{campaign_id}/01c_dock6_run/
 
 Usage:
     python 02_scripts/01c_dock6_run.py --config 03_configs/01c_dock6_run.yaml \
-        --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
+        --campaigns 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
 
 Project: reference_docking
 Module: 01c (DOCK6 rigid re-docking)
@@ -70,7 +70,7 @@ def main():
     )
     parser.add_argument("--config", "-c", type=str, required=True,
                         help="Module config YAML")
-    parser.add_argument("--campaign", type=str, required=True,
+    parser.add_argument("--campaigns", type=str, required=True,
                         help="Campaign config YAML")
     parser.add_argument("--output", "-o", type=str, default=None)
     parser.add_argument("--name", type=str, default=None,
@@ -89,8 +89,8 @@ def main():
     # RESOLVE PARAMETERS
     # =========================================================================
 
-    cc = load_yaml(args.campaign)
-    campaign_dir = Path(args.campaign).parent
+    cc = load_yaml(args.campaigns)
+    campaign_dir = Path(args.campaigns).parent
     campaign_id = cc.get("campaign_id", campaign_dir.name)
 
     # --- Grid routing ---
@@ -104,9 +104,9 @@ def main():
         grid_dir = gc.get("grid_dir", "grids/")
         grid_path = Path(grid_dir) if Path(grid_dir).is_absolute() else campaign_dir / grid_dir
         if (grid_path / gc.get("spheres_file", "spheres_ligand.sph")).exists():
-            logger.info(f"Using grids from campaign: {grid_path}")
+            logger.info(f"Using grids from campaigns: {grid_path}")
         else:
-            logger.warning(f"Grids not found in 01b ({grid_dir_01b}) or campaign ({grid_path})")
+            logger.warning(f"Grids not found in 01b ({grid_dir_01b}) or campaigns ({grid_path})")
 
     spheres_file = str(grid_path / gc.get("spheres_file", "spheres_ligand.sph"))
     grid_prefix = resolve_grid_prefix(
@@ -114,30 +114,34 @@ def main():
     )
 
     # --- Ligand routing (reference docking) ---
-    # Priority: campaign_config.ligand_mol2 > campaign_dir/ligands/
+    # Priority: 00a output > campaign_config.ligand_mol2 > campaign_dir/ligands/
     ligand_dir = None
 
-    ligand_mol2_cfg = cc.get("ligand_mol2")
-    if ligand_mol2_cfg:
-        ligand_mol2_path = Path(ligand_mol2_cfg) if Path(ligand_mol2_cfg).is_absolute() else campaign_dir / ligand_mol2_cfg
-        if ligand_mol2_path.is_dir():
-            ligand_dir = str(ligand_mol2_path)
-        elif ligand_mol2_path.is_file():
-            ligand_dir = str(ligand_mol2_path.parent)
+    # 1. Output from 00a_ligand_preparation (primary source in reference_docking)
+    ligand_dir_00a = Path("05_results") / campaign_id / "00a_ligand_preparation"
+    if ligand_dir_00a.exists() and list(ligand_dir_00a.glob("*.mol2")):
+        ligand_dir = str(ligand_dir_00a)
+        logger.info(f"Using ligands from 00a: {ligand_dir}")
 
+    # 2. campaign_config.ligand_mol2
     if not ligand_dir:
-        # Fallback: campaign_dir/ligands/
-        ligand_dir_candidates = [
-            campaign_dir / "ligands",
-            campaign_dir / "reference",
-        ]
-        for candidate in ligand_dir_candidates:
+        ligand_mol2_cfg = cc.get("ligand_mol2")
+        if ligand_mol2_cfg:
+            ligand_mol2_path = Path(ligand_mol2_cfg) if Path(ligand_mol2_cfg).is_absolute() else campaign_dir / ligand_mol2_cfg
+            if ligand_mol2_path.is_dir():
+                ligand_dir = str(ligand_mol2_path)
+            elif ligand_mol2_path.is_file():
+                ligand_dir = str(ligand_mol2_path.parent)
+
+    # 3. campaign_dir/ligands/ or campaign_dir/reference/
+    if not ligand_dir:
+        for candidate in [campaign_dir / "ligands", campaign_dir / "reference"]:
             if candidate.exists() and list(candidate.glob("*.mol2")):
                 ligand_dir = str(candidate)
                 break
 
     if not ligand_dir:
-        ligand_dir = str(campaign_dir / "ligands")  # Will fail with clear error
+        ligand_dir = str(ligand_dir_00a)  # Will fail with clear error below
 
     # --- Output ---
     output_dir = args.output or str(
@@ -186,8 +190,7 @@ def main():
 
     if not Path(ligand_dir).exists():
         logger.error(f"Ligand directory not found: {ligand_dir}")
-        logger.error("Place crystallographic ligand mol2 files in campaign ligands/ dir,")
-        logger.error("or set ligand_mol2 in campaign_config.yaml.")
+        logger.error("Run 00a_ligand_preparation first, or place mol2 files in campaign ligands/ dir.")
         return 1
 
     # =========================================================================
@@ -253,7 +256,7 @@ def main():
 
     logger.info(f"Next: python 02_scripts/01d_footprint_rescore.py "
                 f"--config 03_configs/01d_footprint_rescore.yaml "
-                f"--campaign {args.campaign}")
+                f"--campaigns {args.campaigns}")
 
     return 0 if result["n_failed"] == 0 else 1
 

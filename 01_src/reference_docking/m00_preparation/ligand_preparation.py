@@ -28,7 +28,7 @@ Input:
   - Receptor PDB (for HETATM extraction in Strategy B)
 
 Output:
-  - 05_results/{campaign}/00a_ligand_preparation/
+  - 05_results/{campaigns}/00a_ligand_preparation/
     - {name}.mol2           (DOCK6-ready, crystal coords)
     - coord_validation.txt  (PDB vs mol2 comparison)
 

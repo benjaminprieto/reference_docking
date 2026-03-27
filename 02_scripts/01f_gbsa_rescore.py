@@ -7,13 +7,13 @@ Re-scores DOCK6 poses with GB/SA Hawkins implicit solvation (primary).
 DOCK6.13 ignores _secondary params. This module runs GB/SA as a
 separate rigid rescore with gbsa_hawkins_score_primary=yes.
 
-Input:  05_results/{campaign}/01c_dock6_run/{name}/{name}_scored.mol2
-Output: 05_results/{campaign}/01f_gbsa_rescore/{name}/{name}_gbsa_scored.mol2
+Input:  05_results/{campaigns}/01c_dock6_run/{name}/{name}_scored.mol2
+Output: 05_results/{campaigns}/01f_gbsa_rescore/{name}/{name}_gbsa_scored.mol2
 
 Usage:
     python 02_scripts/01f_gbsa_rescore.py \\
         --config 03_configs/01f_gbsa_rescore.yaml \\
-        --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
+        --campaigns 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
 
 Project: reference_docking
 Module: 01f (DOCK6)
@@ -42,7 +42,7 @@ def load_yaml(path):
 def main():
     parser = argparse.ArgumentParser(description="01f GB/SA Hawkins Re-scoring")
     parser.add_argument("--config", "-c", type=str, required=True)
-    parser.add_argument("--campaign", type=str, required=True)
+    parser.add_argument("--campaigns", type=str, required=True)
     parser.add_argument("--output", "-o", type=str, default=None)
     parser.add_argument("--name", type=str, default=None)
     parser.add_argument("--timeout", type=int, default=None)
@@ -52,8 +52,8 @@ def main():
                         choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     args = parser.parse_args()
 
-    cc = load_yaml(args.campaign)
-    campaign_dir = Path(args.campaign).parent
+    cc = load_yaml(args.campaigns)
+    campaign_dir = Path(args.campaigns).parent
     campaign_id = cc.get("campaign_id", campaign_dir.name)
     mc = load_yaml(args.config)
     params = mc.get("parameters", {})

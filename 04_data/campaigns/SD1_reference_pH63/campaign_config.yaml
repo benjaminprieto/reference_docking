@@ -12,7 +12,7 @@
 # =============================================================================
 
 # --- Identity ---
-campaign_id: "UDX_reference_pH63"
+campaign_id: "SD1_reference_pH63"
 description: "Example docking campaign"
 
 # --- Receptor ---
@@ -101,7 +101,7 @@ grids:
     # Method A: reference_ligand
     # IMPORTANT: use crystallographic coordinates (extracted from PDB),
     # NOT regenerated from SMILES.
-    reference_mol2: "reference/UDX.mol2"
+    reference_mol2: "reference/SD1.mol2"
 
     # Method B: residues (centroid computed automatically)
     # residues:

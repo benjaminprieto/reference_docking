@@ -8,7 +8,7 @@ Preserves crystal coordinates exactly.
 Usage:
     python 02_scripts/00a_ligand_preparation.py \\
         --config 03_configs/00a_ligand_preparation.yaml \\
-        --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
+        --campaigns 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
 
 Project: reference_docking
 Module: 00a
@@ -37,14 +37,14 @@ def load_yaml(path):
 def main():
     parser = argparse.ArgumentParser(description="00a Ligand Preparation — crystal ligand for reference docking")
     parser.add_argument("--config", "-c", type=str, required=True)
-    parser.add_argument("--campaign", type=str, required=True)
+    parser.add_argument("--campaigns", type=str, required=True)
     parser.add_argument("--output", "-o", type=str, default=None)
     parser.add_argument("--strategy", type=str, choices=["direct", "extract", "inject"], default=None)
     parser.add_argument("--log-level", type=str, default=None, choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     args = parser.parse_args()
 
-    cc = load_yaml(args.campaign)
-    campaign_dir = Path(args.campaign).parent
+    cc = load_yaml(args.campaigns)
+    campaign_dir = Path(args.campaigns).parent
     campaign_id = cc.get("campaign_id", campaign_dir.name)
     mc = load_yaml(args.config)
     params = mc.get("parameters", {})

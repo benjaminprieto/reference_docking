@@ -58,10 +58,10 @@ outputs:
 # =============================================================================
 # python 02_scripts/01b_grid_generation.py \
 #     --config 03_configs/01b_grid_generation.yaml \
-#     --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
+#     --campaigns 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
 #
 # Force regeneration:
 #   python 02_scripts/01b_grid_generation.py \
 #     --config 03_configs/01b_grid_generation.yaml \
-#     --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml --force
+#     --campaigns 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml --force
 # =============================================================================

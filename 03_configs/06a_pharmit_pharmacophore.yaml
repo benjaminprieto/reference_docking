@@ -1,0 +1,98 @@
+# =============================================================================
+# 06a Pharmit Pharmacophore Generator - Configuration (v5.0)
+# =============================================================================
+# Generate ranked sub-pocket Pharmit queries from DOCK6 footprint energy
+# and PLIP crystal interactions.
+#
+# v5.0: PLIP + Footprint IS the pharmacophore.
+# Footprint generates features for residues PLIP misses (vdW contacts,
+# CH-π stacking, weak interactions). Both sources are merged and ranked
+# by energy.
+#
+# INPUT:
+#   Required: DOCK6 residue_consensus.csv (from reference_docking 04b)
+#   Required: Reference ligand mol2 (crystal coordinates)
+#   Required: Receptor mol2 (from 00b)
+#   Optional: PLIP interactions JSON (from 03a)
+#
+# OUTPUT: 05_results/{campaign_id}/06a_pharmit/
+#   pharmacophore_{strategy}.json  — Pharmit JSONs per strategy
+#   pharmacophore_ranking.csv      — Decision table with confidence
+#   pharmacophore_ranking.txt      — Human-readable summary
+#
+# Strategies:
+#   xylose:    Sugar pocket (TRP392, TRP495, GLU529 zone)
+#   uracil:    Base pocket (ASP361, ARG363, THR390 zone)
+#   combined:  Xylose + uracil + ribose (no phosphate, drug-like)
+#   analogues: Full + NegativeIon at phosphate (bioisosteres)
+#   druglike:  Full + HBA at phosphate (broadest search)
+#
+# Project: reference_docking
+# Module: 06a
+# Version: 5.0 — Footprint + PLIP (2026-03-26)
+# =============================================================================
+
+parameters:
+  # --- Feature selection ---
+  n_required: 3        # Top N features are REQUIRED in Pharmit
+  n_optional: 2        # Next N features are OPTIONAL
+  radius: 1.0          # Pharmit feature radius (Å)
+
+  # --- Energy filtering ---
+  energy_cutoff: 0.0   # Exclude features with energy > this (repulsive)
+
+  # --- Footprint feature generation ---
+  footprint_cutoff: -0.5    # Min energy to create feature from footprint (kcal/mol)
+  contact_distance: 4.5     # Max ligand-residue distance for contacts (Å)
+
+  # --- Feature types ---
+  include_hydrophobic: true  # Include Hydrophobic features (v5.0: yes by default)
+
+  # --- Merging ---
+  merge_distance: 2.0  # Distance to merge PLIP + footprint points (Å)
+  group_tolerance: 1.0  # Distance to group PLIP interactions (Å)
+
+  # --- Reference docking results (for auto-discovery) ---
+  # Path to reference_docking 04b output. If relative, from project root.
+  # reference_docking_results: "path/to/reference_docking/05_results/UDX_reference_pH63"
+
+  # --- Strategies (default: all) ---
+  # strategies:
+  #   - xylose
+  #   - uracil
+  #   - combined
+  #   - analogues
+  #   - druglike
+
+  output_name: "pharmacophore"
+  log_level: "INFO"
+
+outputs:
+  subdir: "06a_pharmit"
+
+# =============================================================================
+# USAGE
+# =============================================================================
+#
+# With footprint from reference_docking:
+#   python 02_scripts/06a_pharmit_pharmacophore.py \
+#       --config 03_configs/06a_pharmit_pharmacophore.yaml \
+#       --campaigns 04_data/campaigns/UDX_pharmit_pH63/campaign_config.yaml \
+#       --footprint ../reference_docking/05_results/UDX_reference_pH63/04_dock6_analysis/04b_footprint_analysis/residue_consensus.csv
+#
+# With footprint + PLIP:
+#   python 02_scripts/06a_pharmit_pharmacophore.py \
+#       --config 03_configs/06a_pharmit_pharmacophore.yaml \
+#       --campaigns 04_data/campaigns/UDX_pharmit_pH63/campaign_config.yaml \
+#       --footprint ../reference_docking/05_results/.../residue_consensus.csv \
+#       --plip 05_results/.../03a_plip_analysis/interactions.json
+#
+# Direct (all explicit):
+#   python 02_scripts/06a_pharmit_pharmacophore.py \
+#       --config 03_configs/06a_pharmit_pharmacophore.yaml \
+#       --footprint results/residue_consensus.csv \
+#       --ligand molecules/UDX.mol2 \
+#       --receptor results/rec_charged.mol2 \
+#       --output results/06a_pharmit/ \
+#       --strategies xylose,combined
+# =============================================================================

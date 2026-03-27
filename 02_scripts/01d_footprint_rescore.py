@@ -12,19 +12,19 @@ v2.0 (2026-03-25): Added GB/SA Hawkins implicit solvation support.
 This is a POST-DOCKING step that reads scored mol2 from 01c.
 Based on Rizzo Lab protocol and DOCK6 manual §2.11.9.
 
-Input:  05_results/{campaign}/01c_dock6_run/{name}/{name}_scored.mol2
-Output: 05_results/{campaign}/01d_footprint_rescore/{name}/{name}_fps_scored.mol2
+Input:  05_results/{campaigns}/01c_dock6_run/{name}/{name}_scored.mol2
+Output: 05_results/{campaigns}/01d_footprint_rescore/{name}/{name}_fps_scored.mol2
 
 Usage:
     # Standard (in-vacuo footprint only):
     python 02_scripts/01d_footprint_rescore.py \\
         --config 03_configs/01d_footprint_rescore.yaml \\
-        --campaign 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml
+        --campaigns 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml
 
     # With GB/SA Hawkins implicit solvation:
     python 02_scripts/01d_footprint_rescore.py \\
         --config 03_configs/01d_footprint_rescore.yaml \\
-        --campaign 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml \\
+        --campaigns 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml \\
         --gbsa-hawkins
 
 Project: reference_docking
@@ -68,7 +68,7 @@ def main():
         description="01d Footprint Re-scoring — per-residue energy decomposition",
     )
     parser.add_argument("--config", "-c", type=str, required=True, help="Module YAML")
-    parser.add_argument("--campaign", type=str, required=True, help="Campaign YAML")
+    parser.add_argument("--campaigns", type=str, required=True, help="Campaign YAML")
     parser.add_argument("--output", "-o", type=str, default=None)
     parser.add_argument("--name", type=str, default=None, help="Single molecule")
     parser.add_argument("--timeout", type=int, default=None)
@@ -79,8 +79,8 @@ def main():
     args = parser.parse_args()
 
     # --- Configs ---
-    cc = load_yaml(args.campaign)
-    campaign_dir = Path(args.campaign).parent
+    cc = load_yaml(args.campaigns)
+    campaign_dir = Path(args.campaigns).parent
     campaign_id = cc.get("campaign_id", campaign_dir.name)
     mc = load_yaml(args.config)
     params = mc.get("parameters", {})
@@ -139,7 +139,7 @@ def main():
 
     # --- Execute ---
     logger.info("=" * 60)
-    logger.info("  MOLECULAR_DOCKING - Module 01d: Footprint Re-scoring")
+    logger.info("  REFERENCE_DOCKING - Module 01d: Footprint Re-scoring")
     logger.info("=" * 60)
     logger.info(f"Campaign:     {campaign_id}")
     logger.info(f"Docking dir:  {docking_dir}")
@@ -168,7 +168,7 @@ def main():
 
     logger.info(f"\nNext: python 02_scripts/01e_score_collection.py "
                 f"--config 03_configs/01e_score_collection.yaml "
-                f"--campaign {args.campaign}")
+                f"--campaigns {args.campaigns}")
 
     return 0 if result["n_failed"] == 0 else 1
 

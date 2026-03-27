@@ -11,8 +11,8 @@
 # show artificial repulsion without solvent screening (e.g., ASP494 COO⁻
 # near UDX PO₄²⁻ = +2.74 kcal/mol ES repulsion in vacuo).
 #
-# INPUT:  05_results/{campaign}/01c_dock6_run/{name}/{name}_scored.mol2
-# OUTPUT: 05_results/{campaign}/01f_gbsa_rescore/{name}/{name}_gbsa_scored.mol2
+# INPUT:  05_results/{campaigns}/01c_dock6_run/{name}/{name}_scored.mol2
+# OUTPUT: 05_results/{campaigns}/01f_gbsa_rescore/{name}/{name}_gbsa_scored.mol2
 #
 # Project: reference_docking
 # Module: 01f (DOCK6)
@@ -49,11 +49,11 @@ outputs:
 # # Rigid (crystal coords, no minimization):
 # python 02_scripts/01f_gbsa_rescore.py \
 #     --config 03_configs/01f_gbsa_rescore.yaml \
-#     --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
+#     --campaigns 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
 #
 # # With minimization (recommended by DOCK6 docs, but moves pose):
 # python 02_scripts/01f_gbsa_rescore.py \
 #     --config 03_configs/01f_gbsa_rescore.yaml \
-#     --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml \
+#     --campaigns 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml \
 #     --minimize
 # =============================================================================

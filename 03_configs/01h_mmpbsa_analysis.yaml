@@ -1,0 +1,53 @@
+# =============================================================================
+# 01h MMPBSA Analysis - Configuration (Reference Docking)
+# =============================================================================
+# Parses MMPBSA.py output from 01g and compares with DOCK6 footprint.
+#
+# Produces:
+#   per_residue_decomp.csv             — vdW, ES, GB, SA, total (PDB numbering)
+#   comparison_invacuo_vs_solvated.csv — merge with 01d/04b footprint
+#   zone_summary.json                  — energy by binding site zone
+#   global_binding_energy.json         — total ΔG components
+#
+# INPUT:  05_results/{campaign}/01g_mmpbsa_decomp/mmpbsa/FINAL_DECOMP_MMPBSA.dat
+# OUTPUT: 05_results/{campaign}/01h_mmpbsa_analysis/
+#
+# Project: reference_docking
+# Module: 01h (MMPBSA analysis)
+# Version: 1.0 (2026-03-26)
+# =============================================================================
+
+parameters:
+  # Compare MMPBSA decomposition with DOCK6 in-vacuo footprint (01d/04b)
+  compare_footprint: true
+
+  # Explicit path to footprint CSV (null = auto-resolve from 04b)
+  footprint_csv: null
+
+  log_level: "INFO"
+
+outputs:
+  subdir: "01h_mmpbsa_analysis"
+
+# =============================================================================
+# USAGE
+# =============================================================================
+#
+# Standard (after 01g completes):
+#   python 02_scripts/01h_mmpbsa_analysis.py \
+#       --config 03_configs/01h_mmpbsa_analysis.yaml \
+#       --campaigns 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml
+#
+# With explicit footprint CSV:
+#   python 02_scripts/01h_mmpbsa_analysis.py \
+#       --config 03_configs/01h_mmpbsa_analysis.yaml \
+#       --campaigns 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml \
+#       --footprint-csv 05_results/.../04b_footprint_analysis/residue_consensus.csv
+#
+# Skip footprint comparison:
+#   python 02_scripts/01h_mmpbsa_analysis.py \
+#       --config 03_configs/01h_mmpbsa_analysis.yaml \
+#       --campaigns 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml \
+#       --no-compare-footprint
+#
+# =============================================================================

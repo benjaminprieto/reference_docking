@@ -17,7 +17,7 @@ Hardcoded upstream paths:
     - Output: 05_results/{campaign_id}/01b_grid_generation/
 
 Usage:
-    python 02_scripts/01b_grid_generation.py --config 03_configs/01b_grid_generation.yaml --campaign 04_data/campaigns/example_campaign/campaign_config.yaml
+    python 02_scripts/01b_grid_generation.py --config 03_configs/01b_grid_generation.yaml --campaigns 04_data/campaigns/example_campaign/campaign_config.yaml
 
 Project: reference_docking
 Module: 01b (DOCK6 engine) — renumbered from 01a (2026-03-16)
@@ -64,21 +64,21 @@ def main():
         description="01b Grid Generation — Generate DOCK6 grids (DOCK6 engine)"
     )
     parser.add_argument("--config", type=str, default=None, help="Module config YAML")
-    parser.add_argument("--campaign", type=str, default=None, help="Campaign config YAML")
+    parser.add_argument("--campaigns", type=str, default=None, help="Campaign config YAML")
     parser.add_argument("--output", type=str, default=None)
     parser.add_argument("--force", action="store_true", help="Regenerate even if grids exist")
     args = parser.parse_args()
 
     logger.info("=" * 60)
-    logger.info("  MOLECULAR_DOCKING - Module 01b: Grid Generation (DOCK6)")
+    logger.info("  REFERENCE_DOCKING - Module 01b: Grid Generation (DOCK6)")
     logger.info("=" * 60)
 
-    if not args.campaign:
-        parser.error("--campaign is required")
+    if not args.campaigns:
+        parser.error("--campaigns is required")
 
-    # --- Load campaign config ---
-    cc = load_yaml(args.campaign)
-    campaign_dir = Path(args.campaign).parent
+    # --- Load campaigns config ---
+    cc = load_yaml(args.campaigns)
+    campaign_dir = Path(args.campaigns).parent
     campaign_id = cc.get("campaign_id", campaign_dir.name)
 
     # --- Check for pre-existing grids (Option D: skip) ---
@@ -125,7 +125,7 @@ def main():
                        "sphgen may fail on large proteins — run 00d first.")
     else:
         rec_noH = campaign_dir / rec_config.get("pdb", "receptor/receptor.pdb")
-        logger.info(f"Using campaign receptor as noH PDB: {rec_noH}")
+        logger.info(f"Using campaigns receptor as noH PDB: {rec_noH}")
 
     # rec_charged.mol2
     rec_mol2 = receptor_prep_dir / "rec_charged.mol2"
@@ -207,7 +207,7 @@ def main():
         chain=chain,
         radius=site_radius,
         probe_radius=params.get("probe_radius", 1.4),
-        box_margin=params.get("box_margin", 5.0),
+        box_margin=params.get("box_margin", 1.0),
         grid_spacing=params.get("grid_spacing", 0.3),
         energy_cutoff_distance=params.get("energy_cutoff_distance", 9999.0),
         attractive_exponent=params.get("attractive_exponent", 6),
@@ -221,7 +221,7 @@ def main():
         logger.info("Grid generation successful!")
         logger.info(f"Next: python 02_scripts/01c_dock6_run.py "
                      f"--config 03_configs/01c_dock6_run.yaml "
-                     f"--campaign {args.campaign}")
+                     f"--campaigns {args.campaigns}")
         return 0
     else:
         logger.error(f"Grid generation failed: {result.get('error')}")

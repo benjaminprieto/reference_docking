@@ -131,7 +131,7 @@ def generate_zones_html(
         plip_json_path: Path to 03a interactions.json (optional)
         contact_csv_path: Path to 05f contact_summary.csv (optional)
         campaign_id: Campaign name for title
-        n_molecules: Number of molecules in campaign
+        n_molecules: Number of molecules in campaigns
 
     Returns:
         HTML string

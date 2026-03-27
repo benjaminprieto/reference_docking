@@ -46,15 +46,15 @@ outputs:
 # # Full pipeline (rescore + analyze):
 # python 02_scripts/04b_footprint_analysis.py \
 #     --config 03_configs/04b_footprint_analysis.yaml \
-#     --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
+#     --campaigns 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
 #
 # # Phase 1 only (generate re-scoring inputs, test with --dry-run):
 # python 02_scripts/04b_footprint_analysis.py \
 #     --config 03_configs/04b_footprint_analysis.yaml \
-#     --campaign ... --rescore-only --dry-run
+#     --campaigns ... --rescore-only --dry-run
 #
 # # Phase 2 only (if re-scoring already done):
 # python 02_scripts/04b_footprint_analysis.py \
 #     --config 03_configs/04b_footprint_analysis.yaml \
-#     --campaign ... --analyze-only
+#     --campaigns ... --analyze-only
 # =============================================================================

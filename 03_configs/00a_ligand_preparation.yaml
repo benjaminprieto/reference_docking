@@ -10,7 +10,7 @@
 #   inject  — AM1-BCC charges from antechamber injected into crystal coords
 #
 # INPUT:  campaign_dir/reference/*.mol2 (or PDB for extract strategy)
-# OUTPUT: 05_results/{campaign}/00a_ligand_preparation/{name}.mol2
+# OUTPUT: 05_results/{campaigns}/00a_ligand_preparation/{name}.mol2
 #
 # Project: reference_docking
 # Module: 00a
@@ -37,5 +37,5 @@ outputs:
 # =============================================================================
 # python 02_scripts/00a_ligand_preparation.py \
 #     --config 03_configs/00a_ligand_preparation.yaml \
-#     --campaign 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
+#     --campaigns 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
 # =============================================================================

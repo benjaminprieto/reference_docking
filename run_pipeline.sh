@@ -1,100 +1,112 @@
 #!/bin/bash
 # =============================================================================
-# reference_docking — Full Pipeline
+# run_pipeline.sh — Reference Docking Pipeline
 # =============================================================================
-# Rigid re-docking of crystallographic ligands with DOCK6, followed by
-# footprint-based interaction analysis and PLIP crystal validation.
 #
 # Usage:
-#   bash run_pipeline.sh <campaign_config.yaml>
+#   bash run_pipeline.sh <campaign_config.yaml> [start_from]
 #
-# Example:
-#   bash run_pipeline.sh 04_data/campaigns/SD1_reference_pH63/campaign_config.yaml
+# Examples:
+#   bash run_pipeline.sh 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml
+#   bash run_pipeline.sh 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml 01c
+#   bash run_pipeline.sh 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml 01d
 #
 # Pipeline:
-#   00b  Receptor preparation (chimera DockPrep → rec_charged.mol2)
-#   00d  Binding site definition (spheres from crystal ligand)
-#   01b  Grid generation (DMS → spheres → energy grids)
-#   01c  DOCK6 rigid re-docking (crystal ligand → scored poses)
-#   01d  Footprint rescore (re-score with fps_primary)
-#   01e  Score collection (parse → Excel)
-#   01f  GB/SA Hawkins rescore (implicit solvation, primary score)
-#   03a  PLIP interaction analysis (crystal complex → interaction JSON)
-#   04b  Footprint analysis (per-residue energy + consensus)
+#   00a  Ligand preparation    (crystal mol2 with validated coords)
+#   00b  Receptor preparation  (ChimeraX DockPrep → rec_charged.mol2)
+#   00d  Binding site definition (trimmed receptor from crystal ligand)
+#   01b  Grid generation       (DMS → spheres → tight box 1.0Å → grids)
+#   01c  DOCK6 docking         (grid_score primary, rigid/flex)
+#   01d  Footprint rescore     (fps_primary, per-residue vdW+ES)
+#   01f  GB/SA rescore         (gbsa_hawkins_primary, solvation)
+#   01e  Score collection      (parse all scores → Excel/CSV)
+#   01g  MMPBSA decomposition  (AMBER MMPBSA per-residue: vdW+ES+GB+SA)
+#   01h  MMPBSA analysis       (parse decomp + compare with footprint)
+#   03a  PLIP analysis         (crystal complex → interaction JSON)
+#   04b  Footprint analysis    (per-residue consensus)
+#   06a  Pharmit pharmacophore (footprint+PLIP → Pharmit queries)
+#   06b  Pharmit zone selector (map features → binding site zones)
 # =============================================================================
 set -euo pipefail
 
 if [ $# -lt 1 ]; then
-    echo "Usage: bash run_pipeline.sh <campaign_config.yaml>"
+    echo "Usage: bash run_pipeline.sh <campaign_config.yaml> [start_from]"
+    echo ""
+    echo "Modules: 00a 00b 00d 01b 01c 01d 01f 01e 01g 01h 03a 04b 06a 06b"
+    echo ""
+    echo "Examples:"
+    echo "  bash run_pipeline.sh config.yaml        # full pipeline"
+    echo "  bash run_pipeline.sh config.yaml 01c    # start from docking"
+    echo "  bash run_pipeline.sh config.yaml 01d    # start from footprint"
     exit 1
 fi
 
 CAMPAIGN="$1"
+START="${2:-00a}"
 CONFIGS="03_configs"
 SCRIPTS="02_scripts"
 
+if [ ! -f "$CAMPAIGN" ]; then
+    echo "ERROR: Campaign config not found: $CAMPAIGN"
+    exit 1
+fi
+
+# Module order
+MODULES=(00a 00b 00d 01b 01c 01d 01f 01e 01g 01h 03a 04b 06a 06b)
+
+# Find start index
+START_IDX=0
+for i in "${!MODULES[@]}"; do
+    if [ "${MODULES[$i]}" = "$START" ]; then
+        START_IDX=$i
+        break
+    fi
+done
+
 echo "============================================================"
-echo "  REFERENCE_DOCKING — Pipeline"
+echo "  REFERENCE_DOCKING — Pipeline v2.1"
 echo "  Campaign: $CAMPAIGN"
+echo "  Start:    $START"
+echo "  Started:  $(date '+%Y-%m-%d %H:%M:%S')"
 echo "============================================================"
 echo ""
 
-# --- 00b: Receptor Preparation ---
-echo "[00b] Receptor Preparation"
-python "$SCRIPTS/00b_receptor_preparation.py" \
-    --config "$CONFIGS/00b_receptor_preparation.yaml" \
-    --campaign "$CAMPAIGN"
+run_module() {
+    local mod="$1"
+    local script="$2"
+    local config="$3"
+    local label="$4"
 
-# --- 00d: Binding Site Definition ---
-echo "[00d] Binding Site Definition"
-python "$SCRIPTS/00d_binding_site_definition.py" \
-    --config "$CONFIGS/00d_binding_site_definition.yaml" \
-    --campaign "$CAMPAIGN"
+    echo "[$mod] $label — $(date '+%H:%M:%S')"
+    python "$SCRIPTS/$script" \
+        --config "$CONFIGS/$config" \
+        --campaigns "$CAMPAIGN"
+    echo ""
+}
 
-# --- 01b: Grid Generation ---
-echo "[01b] Grid Generation"
-python "$SCRIPTS/01b_grid_generation.py" \
-    --config "$CONFIGS/01b_grid_generation.yaml" \
-    --campaign "$CAMPAIGN"
+for i in "${!MODULES[@]}"; do
+    [ "$i" -lt "$START_IDX" ] && continue
 
-# --- 01c: DOCK6 Rigid Re-Docking ---
-echo "[01c] DOCK6 Rigid Re-Docking"
-python "$SCRIPTS/01c_dock6_run.py" \
-    --config "$CONFIGS/01c_dock6_run.yaml" \
-    --campaign "$CAMPAIGN"
+    case "${MODULES[$i]}" in
+        00a) run_module 00a 00a_ligand_preparation.py 00a_ligand_preparation.yaml "Ligand Preparation" ;;
+        00b) run_module 00b 00b_receptor_preparation.py 00b_receptor_preparation.yaml "Receptor Preparation" ;;
+        00d) run_module 00d 00d_binding_site_definition.py 00d_binding_site_definition.yaml "Binding Site Definition" ;;
+        01b) run_module 01b 01b_grid_generation.py 01b_grid_generation.yaml "Grid Generation" ;;
+        01c) run_module 01c 01c_dock6_run.py 01c_dock6_run.yaml "DOCK6 Docking" ;;
+        01d) run_module 01d 01d_footprint_rescore.py 01d_footprint_rescore.yaml "Footprint Rescore" ;;
+        01f) run_module 01f 01f_gbsa_rescore.py 01f_gbsa_rescore.yaml "GB/SA Hawkins Rescore" ;;
+        01e) run_module 01e 01e_score_collection.py 01e_score_collection.yaml "Score Collection" ;;
+        01g) run_module 01g 01g_mmpbsa_decomp.py 01g_mmpbsa_decomp.yaml "MMPBSA Decomposition" ;;
+        01h) run_module 01h 01h_mmpbsa_analysis.py 01h_mmpbsa_analysis.yaml "MMPBSA Analysis" ;;
+        03a) run_module 03a 03a_plip_interaction_analysis.py 03a_plip_interaction_analysis.yaml "PLIP Analysis" ;;
+        04b) run_module 04b 04b_footprint_analysis.py 04b_footprint_analysis.yaml "Footprint Analysis" ;;
+        06a) run_module 06a 06a_pharmit_pharmacophore.py 06a_pharmit_pharmacophore.yaml "Pharmit Pharmacophore" ;;
+        06b) run_module 06b 06b_pharmit_zone_selector.py 06b_pharmit_zone_selector.yaml "Pharmit Zone Selector" ;;
+    esac
+done
 
-# --- 01d: Footprint Rescore ---
-echo "[01d] Footprint Rescore"
-python "$SCRIPTS/01d_footprint_rescore.py" \
-    --config "$CONFIGS/01d_footprint_rescore.yaml" \
-    --campaign "$CAMPAIGN"
-
-# --- 01e: Score Collection ---
-echo "[01e] Score Collection"
-python "$SCRIPTS/01e_score_collection.py" \
-    --config "$CONFIGS/01e_score_collection.yaml" \
-    --campaign "$CAMPAIGN"
-
-# --- 01f: GB/SA Hawkins Re-scoring ---
-echo "[01f] GB/SA Hawkins Re-scoring"
-python "$SCRIPTS/01f_gbsa_hawkins_rescore.py" \
-    --config "$CONFIGS/01f_gbsa_hawkins_rescore.yaml" \
-    --campaign "$CAMPAIGN"
-
-# --- 03a: PLIP Interaction Analysis ---
-echo "[03a] PLIP Interaction Analysis"
-python "$SCRIPTS/03a_plip_interaction_analysis.py" \
-    --config "$CONFIGS/03a_plip_interaction_analysis.yaml" \
-    --campaign "$CAMPAIGN"
-
-# --- 04b: Footprint Analysis ---
-echo "[04b] Footprint Analysis"
-python "$SCRIPTS/04b_footprint_analysis.py" \
-    --config "$CONFIGS/04b_footprint_analysis.yaml" \
-    --campaign "$CAMPAIGN"
-
-echo ""
 echo "============================================================"
 echo "  PIPELINE COMPLETE"
-echo "  Results: 05_results/"
+echo "  Finished: $(date '+%Y-%m-%d %H:%M:%S')"
+echo "  Results:  05_results/"
 echo "============================================================"

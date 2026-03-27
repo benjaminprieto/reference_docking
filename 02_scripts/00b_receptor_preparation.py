@@ -36,18 +36,18 @@ Output: 05_results/{campaign_id}/00b_receptor_preparation/
 
 Usage:
     # Recommended (PDB2PQR + ChimeraX):
-    python 02_scripts/00b_receptor_preparation.py --config 03_configs/00b_receptor_preparation.yaml --campaign 04_data/campaigns/example_campaign/campaign_config.yaml
+    python 02_scripts/00b_receptor_preparation.py --config 03_configs/00b_receptor_preparation.yaml --campaigns 04_data/campaigns/example_campaign/campaign_config.yaml
 
     # Override pH:
     python 02_scripts/00b_receptor_preparation.py \\
         --config 03_configs/00b_receptor_preparation.yaml \\
-        --campaign 04_data/campaigns/example_campaign/campaign_config.yaml \\
+        --campaigns 04_data/campaigns/example_campaign/campaign_config.yaml \\
         --ph 6.3
 
     # ChimeraX only (no PDB2PQR):
     python 02_scripts/00b_receptor_preparation.py \\
         --config 03_configs/00b_receptor_preparation.yaml \\
-        --campaign 04_data/campaigns/example_campaign/campaign_config.yaml \\
+        --campaigns 04_data/campaigns/example_campaign/campaign_config.yaml \\
         --tool chimerax
 
 Project: reference_docking
@@ -98,21 +98,21 @@ def main():
     # Modes
     parser.add_argument("--config", "-c", type=str, default=None,
                         help="Module config YAML")
-    parser.add_argument("--campaign", type=str, default=None,
+    parser.add_argument("--campaigns", type=str, default=None,
                         help="Campaign config YAML")
 
     # Direct mode
     parser.add_argument("--receptor", "-r", type=str, default=None,
-                        help="Path to receptor PDB (overrides campaign)")
+                        help="Path to receptor PDB (overrides campaigns)")
     parser.add_argument("--output", "-o", type=str, default=None,
                         help="Output directory")
 
     # Parameter overrides
     parser.add_argument("--ph", type=float, default=None,
-                        help="Docking pH (overrides campaign)")
+                        help="Docking pH (overrides campaigns)")
     parser.add_argument("--tool", type=str, default=None,
                         choices=["pdb2pqr", "chimerax", "obabel"],
-                        help="Protonation tool (overrides campaign)")
+                        help="Protonation tool (overrides campaigns)")
     parser.add_argument("--force-field", type=str, default=None,
                         choices=["AMBER", "CHARMM", "PARSE"],
                         help="Force field for PDB2PQR")
@@ -146,9 +146,9 @@ def main():
     log_level = "INFO"
 
     # --- Campaign config ---
-    if args.campaign:
-        cc = load_yaml(args.campaign)
-        campaign_dir = Path(args.campaign).parent
+    if args.campaigns:
+        cc = load_yaml(args.campaigns)
+        campaign_dir = Path(args.campaigns).parent
         campaign_id = cc.get("campaign_id", campaign_dir.name)
         docking_ph = cc.get("docking_ph", docking_ph)
 
@@ -223,7 +223,7 @@ def main():
     # =========================================================================
 
     logger.info("=" * 60)
-    logger.info("  MOLECULAR_DOCKING - Module 00b: Receptor Preparation")
+    logger.info("  REFERENCE_DOCKING - Module 00b: Receptor Preparation")
     logger.info("  Version 2.0 (ChimeraX backbone)")
     logger.info("=" * 60)
     logger.info(f"Campaign:     {campaign_id}")
@@ -289,7 +289,7 @@ def main():
     logger.info(f"{'=' * 60}")
     logger.info(f"Next: python 02_scripts/00d_binding_site_definition.py "
                 f"--config 03_configs/00d_binding_site_definition.yaml "
-                f"--campaign {args.campaign or '<campaign_config.yaml>'}")
+                f"--campaigns {args.campaigns or '<campaign_config.yaml>'}")
 
     return 0
 

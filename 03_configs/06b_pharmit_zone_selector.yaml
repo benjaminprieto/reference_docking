@@ -1,0 +1,65 @@
+# =============================================================================
+# 06b Pharmit Zone Selector - Configuration (v2.0)
+# =============================================================================
+# Maps Pharmit auto-detected features to binding site zones and generates
+# variant JSONs with different zone combinations enabled/disabled.
+#
+# v2.0: Supports PLIP + footprint anchors. At least one required.
+#
+# INPUT:
+#   Required: Pharmit-exported JSON (from pharmit.csb.pitt.edu)
+#   At least one anchor source:
+#     PLIP interactions JSON (from 03a)
+#     DOCK6 residue_consensus.csv (from reference_docking 04b)
+#
+# OUTPUT: 05_results/{campaign_id}/06b_pharmit_zones/
+#   pharmit_{strategy}.json      — one per zone combination
+#   pharmit_zone_mapping.csv     — feature→zone mapping
+#   pharmit_zone_mapping.html    — visual decision table
+#
+# Project: reference_docking
+# Module: 06b
+# Version: 2.0
+# =============================================================================
+
+parameters:
+  # Max distance (Å) for feature→anchor matching
+  max_distance: 3.5
+
+  # Energy cutoff for footprint anchors (kcal/mol)
+  footprint_cutoff: -0.5
+
+  # Path to footprint CSV from reference_docking (optional, can also use --footprint CLI)
+  # footprint_csv: "../reference_docking/05_results/UDX_reference_pH63/04_dock6_analysis/04b_footprint_analysis/residue_consensus.csv"
+
+  log_level: "INFO"
+
+outputs:
+  subdir: "06b_pharmit_zones"
+
+# =============================================================================
+# USAGE
+# =============================================================================
+#
+# With PLIP only (original flow):
+#   python 02_scripts/06b_pharmit_zone_selector.py \
+#       --config 03_configs/06b_pharmit_zone_selector.yaml \
+#       --campaigns 04_data/campaigns/UDX_pharmit_pH63/campaign_config.yaml \
+#       --pharmit 04_data/campaigns/UDX_pharmit_pH63/reference/pharmit.json \
+#       --plip 05_results/.../03a_plip_analysis/interactions.json
+#
+# With footprint only (no PLIP needed):
+#   python 02_scripts/06b_pharmit_zone_selector.py \
+#       --config 03_configs/06b_pharmit_zone_selector.yaml \
+#       --campaigns 04_data/campaigns/UDX_pharmit_pH63/campaign_config.yaml \
+#       --pharmit reference/pharmit.json \
+#       --footprint ../reference_docking/05_results/.../residue_consensus.csv
+#
+# Both (best coverage):
+#   python 02_scripts/06b_pharmit_zone_selector.py \
+#       --config 03_configs/06b_pharmit_zone_selector.yaml \
+#       --campaigns ... \
+#       --pharmit reference/pharmit.json \
+#       --plip interactions.json \
+#       --footprint residue_consensus.csv
+# =============================================================================

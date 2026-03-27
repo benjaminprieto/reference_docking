@@ -120,41 +120,41 @@ Desde la raíz del proyecto (o como Run Configurations en PyCharm):
 # === Shared preparation ===
 
 # 00a — Parsear moléculas
-python 02_scripts/00a_molecule_parser.py --config 03_configs/00a_molecule_parser.yaml --campaign 04_data/campaigns/mi_campana/campaign_config.yaml
+python 02_scripts/00a_molecule_parser.py --config 03_configs/00a_molecule_parser.yaml --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml
 
 # 00b — Preparar receptor (ChimeraX + PDB2PQR)
-python 02_scripts/00b_receptor_preparation.py --config 03_configs/00b_receptor_preparation.yaml --campaign 04_data/campaigns/mi_campana/campaign_config.yaml
+python 02_scripts/00b_receptor_preparation.py --config 03_configs/00b_receptor_preparation.yaml --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml
 
 # 00c — Protonar ligandos
-python 02_scripts/00c_ionization_profiling.py --config 03_configs/00c_ionization_profiling.yaml --campaign 04_data/campaigns/mi_campana/campaign_config.yaml
+python 02_scripts/00c_ionization_profiling.py --config 03_configs/00c_ionization_profiling.yaml --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml
 
 # 00d — Binding site definition (recorte del receptor)
-python 02_scripts/00d_binding_site_definition.py --config 03_configs/00d_binding_site_definition.yaml --campaign 04_data/campaigns/mi_campana/campaign_config.yaml
+python 02_scripts/00d_binding_site_definition.py --config 03_configs/00d_binding_site_definition.yaml --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml
 
 # === DOCK6 engine ===
 
 # 01a — Antechamber (AM1-BCC charges)
-python 02_scripts/01a_antechamber_preparation.py --config 03_configs/01a_antechamber_preparation.yaml --campaign 04_data/campaigns/mi_campana/campaign_config.yaml
+python 02_scripts/01a_antechamber_preparation.py --config 03_configs/01a_antechamber_preparation.yaml --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml
 
 # 01b — Generar grids
-python 02_scripts/01b_grid_generation.py --config 03_configs/01b_grid_generation.yaml --campaign 04_data/campaigns/mi_campana/campaign_config.yaml
+python 02_scripts/01b_grid_generation.py --config 03_configs/01b_grid_generation.yaml --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml
 
 # 01c — DOCK6 docking
-python 02_scripts/01c_dock6_run.py --config 03_configs/01c_dock6_run.yaml --campaign 04_data/campaigns/mi_campana/campaign_config.yaml
+python 02_scripts/01c_dock6_run.py --config 03_configs/01c_dock6_run.yaml --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml
 
 # 01d — DOCK6 score collection
-python 02_scripts/01d_score_collection.py --config 03_configs/01d_score_collection.yaml --campaign 04_data/campaigns/mi_campana/campaign_config.yaml
+python 02_scripts/01d_score_collection.py --config 03_configs/01d_score_collection.yaml --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml
 
 # === Vina engine ===
 
 # 02a — Vina preparation (PDBQT conversion + binding box)
-python 02_scripts/02a_vina_preparation.py --config 03_configs/02a_vina_preparation.yaml --campaign 04_data/campaigns/mi_campana/campaign_config.yaml
+python 02_scripts/02a_vina_preparation.py --config 03_configs/02a_vina_preparation.yaml --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml
 
 # 02b — Vina docking
-python 02_scripts/02b_vina_runner.py --config 03_configs/02b_vina_runner.yaml --campaign 04_data/campaigns/mi_campana/campaign_config.yaml
+python 02_scripts/02b_vina_runner.py --config 03_configs/02b_vina_runner.yaml --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml
 
 # 02c — Vina score collection
-python 02_scripts/02c_vina_score_collector.py --config 03_configs/02c_vina_score_collector.yaml --campaign 04_data/campaigns/mi_campana/campaign_config.yaml
+python 02_scripts/02c_vina_score_collector.py --config 03_configs/02c_vina_score_collector.yaml --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml
 
 # === Or run everything at once ===
 bash run_pipeline.sh mi_campana              # both engines

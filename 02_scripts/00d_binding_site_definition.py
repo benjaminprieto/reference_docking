@@ -29,7 +29,7 @@ Output: 05_results/{campaign_id}/00d_binding_site/
 Usage:
     python 02_scripts/00d_binding_site_definition.py \
         --config 03_configs/00d_binding_site_definition.yaml \
-        --campaign 04_data/campaigns/example_campaign/campaign_config.yaml
+        --campaigns 04_data/campaigns/example_campaign/campaign_config.yaml
 
 Project: reference_docking
 Module: 00d — renumbered from 00e (2026-03-16)
@@ -73,7 +73,7 @@ def main():
     )
     parser.add_argument("--config", "-c", type=str, default=None,
                         help="Module config YAML")
-    parser.add_argument("--campaign", type=str, default=None,
+    parser.add_argument("--campaigns", type=str, default=None,
                         help="Campaign config YAML")
 
     # Direct mode overrides
@@ -111,9 +111,9 @@ def main():
     log_level = "INFO"
 
     # --- Campaign config ---
-    if args.campaign:
-        cc = load_yaml(args.campaign)
-        campaign_dir = Path(args.campaign).parent
+    if args.campaigns:
+        cc = load_yaml(args.campaigns)
+        campaign_dir = Path(args.campaigns).parent
         campaign_id = cc.get("campaign_id", campaign_dir.name)
 
         # Receptor
@@ -179,7 +179,7 @@ def main():
 
     # --- Validate ---
     if not receptor_noH:
-        parser.error("Provide --campaign or --receptor. Run 00b first.")
+        parser.error("Provide --campaigns or --receptor. Run 00b first.")
     if not output_dir:
         output_dir = "05_results/00d_binding_site"
 
@@ -209,7 +209,7 @@ def main():
     # =========================================================================
 
     logger.info("=" * 60)
-    logger.info("  MOLECULAR_DOCKING - Module 00d: Binding Site Definition")
+    logger.info("  REFERENCE_DOCKING - Module 00d: Binding Site Definition")
     logger.info("=" * 60)
     logger.info(f"Campaign:       {campaign_id}")
     logger.info(f"Receptor:       {receptor_noH}")
@@ -238,7 +238,7 @@ def main():
 
     logger.info(f"Next: python 02_scripts/01b_grid_generation.py "
                 f"--config 03_configs/01b_grid_generation.yaml "
-                f"--campaign {args.campaign or '<campaign_config.yaml>'}")
+                f"--campaigns {args.campaigns or '<campaign_config.yaml>'}")
 
     return 0
 

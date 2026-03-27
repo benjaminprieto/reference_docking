@@ -1,0 +1,60 @@
+# =============================================================================
+# Campaign Configuration — UDX Reference Docking
+# =============================================================================
+# Rigid re-docking of co-crystallized UDX against XT1 receptor (6EJ7).
+#
+# Project: reference_docking
+# Version: 1.0 (2026-03-25)
+# =============================================================================
+
+# --- Identity ---
+campaign_id: "UDX_reference_pH63"
+description: "UDX crystal ligand rigid re-docking at pH 6.3 (Golgi)"
+
+# --- Receptor ---
+receptor:
+  pdb: "receptor/XT1_6EJ7.pdb"
+  chain: null
+  protonation:
+    enabled: true
+    tool: "pdb2pqr"
+    force_field: "AMBER"
+  prepared_mol2: null
+  remove_water: true
+  remove_hetatm: true
+
+# --- Docking pH ---
+docking_ph: 6.3
+
+# --- Reference ligand ---
+# 3-letter residue name in the PDB (for 00a extraction)
+ligand_id: "UDX"
+# Chain containing the ligand (null = auto-detect)
+ligand_chain: null
+# Output mol2 from 00a (also used as footprint reference in 01d)
+ligand_mol2: "ligands/"
+# Reference mol2 for footprint comparison (from 00a output)
+reference_mol2: "reference/UDX.mol2"
+
+# --- DOCK6 grids ---
+grids:
+  grid_dir: "grids/"
+  spheres_file: "spheres_ligand.sph"
+  energy_grid: "ligand.nrg"
+  bump_grid: "ligand.bmp"
+  generate: true
+  binding_site:
+    method: "reference_ligand"
+    reference_mol2: "reference/UDX.mol2"
+    radius: 6.0
+
+# --- Output ---
+output:
+  scores_filename: "dock6_scores.xlsx"
+  mol2_dirname: "best_poses"
+
+# --- Traceability ---
+metadata:
+  source: "PDB 6EJ7"
+  date: null
+  notes: "Reference docking for footprint validation"

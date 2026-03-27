@@ -85,18 +85,18 @@ outputs:
 # # Protonacion pH-aware (recomendada para Golgi targeting):
 # python 02_scripts/00b_receptor_preparation.py \
 #     --config 03_configs/00b_receptor_preparation.yaml \
-#     --campaign 04_data/campaigns/mi_campana/campaign_config.yaml \
+#     --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml \
 #     --ph 6.3 --tool pdb2pqr
 #
 # # ChimeraX directo (pH fisiologico):
 # python 02_scripts/00b_receptor_preparation.py \
 #     --config 03_configs/00b_receptor_preparation.yaml \
-#     --campaign 04_data/campaigns/mi_campana/campaign_config.yaml \
+#     --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml \
 #     --tool chimerax
 #
 # # Solo chain A:
 # python 02_scripts/00b_receptor_preparation.py \
 #     --config 03_configs/00b_receptor_preparation.yaml \
-#     --campaign 04_data/campaigns/mi_campana/campaign_config.yaml \
+#     --campaigns 04_data/campaigns/mi_campana/campaign_config.yaml \
 #     --chain A
 # =============================================================================

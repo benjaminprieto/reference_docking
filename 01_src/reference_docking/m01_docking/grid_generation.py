@@ -666,7 +666,7 @@ def run_grid_generation(
         radius: float = 10.0,
         probe_radius: float = 1.4,
         max_spheres: int = 50,
-        box_margin: float = 10.0,
+        box_margin: float = 1.0,
         grid_spacing: float = 0.3,
         energy_cutoff_distance: float = 9999.0,
         attractive_exponent: int = 6,

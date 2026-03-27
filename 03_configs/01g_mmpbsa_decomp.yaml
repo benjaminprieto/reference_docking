@@ -1,0 +1,137 @@
+# =============================================================================
+# 01g MMPBSA Per-Residue Decomposition - Configuration (Reference Docking)
+# =============================================================================
+# Prepares AMBER system and runs MMPBSA.py per-residue decomposition.
+#
+# Fills the gap between:
+#   01d Footprint (vdW + ES in-vacuo per-residue) — overestimates charged pairs
+#   01f GB/SA Hawkins (global solvation score) — no per-residue breakdown
+#
+# Two modes:
+#   single_point — 1-frame MMPBSA on best pose (minutes, no error bars)
+#   md           — OpenMM MD + MMPBSA on trajectory (hours, mean ± std)
+#
+# INPUT:  05_results/{campaign}/01c_dock6_run/{name}/{name}_scored.mol2
+#         05_results/{campaign}/00b_receptor_preparation/rec_charged.mol2
+#         05_results/{campaign}/00b_receptor_preparation/receptor_protonated.pdb
+# OUTPUT: 05_results/{campaign}/01g_mmpbsa_decomp/
+#
+# Analysis of output is in 01h (mmpbsa_analysis.py).
+#
+# Project: reference_docking
+# Module: 01g (DOCK6 → AMBER MMPBSA)
+# Version: 1.0 (2026-03-26)
+# =============================================================================
+
+parameters:
+
+  # ┌───────────────────────────────────────────────────────────────┐
+  # │  Mode Selection                                              │
+  # │                                                               │
+  # │  single_point: 1-frame MMPBSA (fast, no error bars)          │
+  # │  md:           OpenMM MD → trajectory MMPBSA (mean ± std)    │
+  # └───────────────────────────────────────────────────────────────┘
+  mode: "md"
+
+  # ┌───────────────────────────────────────────────────────────────┐
+  # │  Pose Selection                                              │
+  # │                                                               │
+  # │  best_score: lowest Grid_Score from 01c scored mol2           │
+  # │  pose_index: explicit 1-based index into scored mol2          │
+  # └───────────────────────────────────────────────────────────────┘
+  pose_selection: "best_score"
+  pose_index: 1
+
+  # ┌───────────────────────────────────────────────────────────────┐
+  # │  MMPBSA Parameters                                           │
+  # │                                                               │
+  # │  idecomp: 1 = per-residue, 3 = pairwise ligand-residue       │
+  # │  igb:     2 = OBC-II (Onufriev-Bashford-Case), recommended   │
+  # │           5 = GBn (alternative, sometimes better for ions)    │
+  # │  saltcon: ionic strength in M (0.15 = physiological 150 mM)  │
+  # └───────────────────────────────────────────────────────────────┘
+  mmpbsa:
+    idecomp: 1
+    igb: 2
+    saltcon: 0.15
+
+  # ┌───────────────────────────────────────────────────────────────┐
+  # │  Force Field & Parametrization                               │
+  # │                                                               │
+  # │  receptor_ff:  AMBER force field for protein                  │
+  # │  ligand_ff:    GAFF2 for small molecules (antechamber)        │
+  # │  charge_method: bcc = AM1-BCC (accurate), gas = Gasteiger    │
+  # └───────────────────────────────────────────────────────────────┘
+  receptor_ff: "ff14SB"
+  ligand_ff: "gaff2"
+  charge_method: "bcc"
+
+  # ┌───────────────────────────────────────────────────────────────┐
+  # │  MD Protocol (only used when mode = md)                      │
+  # │                                                               │
+  # │  engine:      openmm (GPU via CUDA)                           │
+  # │  production:  ns of production MD (default 5, max ~10)        │
+  # │  dt:          timestep in ps (0.002 = 2 fs with SHAKE)       │
+  # │  temperature: in Kelvin                                       │
+  # │  pressure:    in bar (1.0 = 1 atm, NPT ensemble)             │
+  # │  solvent_padding: TIP3P box padding in Å                     │
+  # │  ionic_strength: NaCl concentration for neutralization        │
+  # │  save_interval_ps:   trajectory frame save interval           │
+  # │  mmpbsa_interval_ps: frames to extract for MMPBSA analysis   │
+  # │                                                               │
+  # │  With OpenMM + RTX A6000, 5 ns ≈ 20-40 min for ~40K atoms.  │
+  # └───────────────────────────────────────────────────────────────┘
+  md:
+    engine: "openmm"
+    production_ns: 5.0
+    dt: 0.002
+    temperature: 300.0
+    pressure: 1.0
+    solvent_padding: 10.0
+    ionic_strength: 0.15
+    save_interval_ps: 10.0
+    mmpbsa_interval_ps: 100.0
+
+    minimization:
+      restrained_steps: 5000
+      unrestrained_steps: 5000
+      restraint_k: 10.0
+
+    heating_ps: 100.0
+    equilibration_ps: 500.0
+
+  # Timeout for antechamber ligand parametrization (seconds)
+  antechamber_timeout: 1800
+
+  log_level: "INFO"
+
+outputs:
+  subdir: "01g_mmpbsa_decomp"
+
+# =============================================================================
+# USAGE
+# =============================================================================
+#
+# Single-point (fast, no MD):
+#   python 02_scripts/01g_mmpbsa_decomp.py \
+#       --config 03_configs/01g_mmpbsa_decomp.yaml \
+#       --campaigns 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml
+#
+# With MD (5 ns, OpenMM + GPU):
+#   python 02_scripts/01g_mmpbsa_decomp.py \
+#       --config 03_configs/01g_mmpbsa_decomp.yaml \
+#       --campaigns 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml \
+#       --mode md
+#
+# Override production length:
+#   python 02_scripts/01g_mmpbsa_decomp.py \
+#       --config 03_configs/01g_mmpbsa_decomp.yaml \
+#       --campaigns 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml \
+#       --mode md --production-ns 10.0
+#
+# Then analyze:
+#   python 02_scripts/01h_mmpbsa_analysis.py \
+#       --config 03_configs/01h_mmpbsa_analysis.yaml \
+#       --campaigns 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml
+#
+# =============================================================================
