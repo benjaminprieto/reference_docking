@@ -4,12 +4,13 @@
 # =============================================================================
 #
 # Usage:
-#   bash run_pipeline.sh <campaign_config.yaml> [start_from]
+#   bash run_pipeline.sh <campaign_config.yaml> [start] [stop]
 #
 # Examples:
 #   bash run_pipeline.sh 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml
 #   bash run_pipeline.sh 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml 01c
-#   bash run_pipeline.sh 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml 01d
+#   bash run_pipeline.sh 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml 00a 00d
+#   bash run_pipeline.sh 04_data/campaigns/UDX_reference_pH63/campaign_config.yaml 01g 01g
 #
 # Pipeline:
 #   00a  Ligand preparation    (crystal mol2 with validated coords)
@@ -30,19 +31,21 @@
 set -euo pipefail
 
 if [ $# -lt 1 ]; then
-    echo "Usage: bash run_pipeline.sh <campaign_config.yaml> [start_from]"
+    echo "Usage: bash run_pipeline.sh <campaign_config.yaml> [start] [stop]"
     echo ""
     echo "Modules: 00a 00b 00d 01b 01c 01d 01f 01e 01g 01h 03a 04b 06a 06b"
     echo ""
     echo "Examples:"
-    echo "  bash run_pipeline.sh config.yaml        # full pipeline"
-    echo "  bash run_pipeline.sh config.yaml 01c    # start from docking"
-    echo "  bash run_pipeline.sh config.yaml 01d    # start from footprint"
+    echo "  bash run_pipeline.sh config.yaml            # full pipeline"
+    echo "  bash run_pipeline.sh config.yaml 01c        # start from docking"
+    echo "  bash run_pipeline.sh config.yaml 00a 00d    # 00a through 00d"
+    echo "  bash run_pipeline.sh config.yaml 01g 01g    # only 01g"
     exit 1
 fi
 
 CAMPAIGN="$1"
 START="${2:-00a}"
+STOP="${3:-}"
 CONFIGS="03_configs"
 SCRIPTS="02_scripts"
 
@@ -63,10 +66,22 @@ for i in "${!MODULES[@]}"; do
     fi
 done
 
+# Find stop index (default: last module)
+STOP_IDX=$(( ${#MODULES[@]} - 1 ))
+if [ -n "$STOP" ]; then
+    for i in "${!MODULES[@]}"; do
+        if [ "${MODULES[$i]}" = "$STOP" ]; then
+            STOP_IDX=$i
+            break
+        fi
+    done
+fi
+
 echo "============================================================"
 echo "  REFERENCE_DOCKING — Pipeline v2.1"
 echo "  Campaign: $CAMPAIGN"
 echo "  Start:    $START"
+echo "  Stop:     ${STOP:-end}"
 echo "  Started:  $(date '+%Y-%m-%d %H:%M:%S')"
 echo "============================================================"
 echo ""
@@ -86,6 +101,7 @@ run_module() {
 
 for i in "${!MODULES[@]}"; do
     [ "$i" -lt "$START_IDX" ] && continue
+    [ "$i" -gt "$STOP_IDX" ] && break
 
     case "${MODULES[$i]}" in
         00a) run_module 00a 00a_ligand_preparation.py 00a_ligand_preparation.yaml "Ligand Preparation" ;;
@@ -109,4 +125,4 @@ echo "============================================================"
 echo "  PIPELINE COMPLETE"
 echo "  Finished: $(date '+%Y-%m-%d %H:%M:%S')"
 echo "  Results:  05_results/"
-echo "============================================================"
+echo "============================================================"N

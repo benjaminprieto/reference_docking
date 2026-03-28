@@ -147,6 +147,56 @@ go
 quit
 """
 
+# tleap input for gas-phase topologies when ligand is a peptide (ff14SB, no GAFF2)
+TLEAP_GAS_PEPTIDE_TEMPLATE = """\
+source leaprc.protein.{receptor_ff}
+source leaprc.water.tip3p
+
+# Load peptide ligand (same FF as receptor)
+LIG = loadpdb {ligand_pdb}
+
+# Load receptor
+REC = loadpdb {receptor_pdb}
+
+# Complex = receptor + ligand
+COM = combine {{REC LIG}}
+
+# Save gas-phase topologies
+saveamberparm COM {complex_prmtop} {complex_inpcrd}
+saveamberparm REC {receptor_prmtop} {receptor_inpcrd}
+saveamberparm LIG {ligand_prmtop} {ligand_inpcrd}
+
+quit
+"""
+
+# tleap input for solvated peptide system (MD mode)
+TLEAP_SOLVATED_PEPTIDE_TEMPLATE = """\
+source leaprc.protein.{receptor_ff}
+source leaprc.water.tip3p
+
+# Load peptide ligand (same FF as receptor)
+LIG = loadpdb {ligand_pdb}
+
+# Load receptor
+REC = loadpdb {receptor_pdb}
+
+# Complex = receptor + ligand
+COM = combine {{REC LIG}}
+
+# Solvate with TIP3P
+solvateoct COM TIP3PBOX {solvent_padding}
+
+# Neutralize + add ions
+addionsrand COM Na+ 0
+addionsrand COM Cl- 0
+{extra_ions}
+
+# Save solvated topology
+saveamberparm COM {solvated_prmtop} {solvated_inpcrd}
+
+quit
+"""
+
 
 # =============================================================================
 # 1. POSE EXTRACTION
@@ -375,6 +425,135 @@ def parametrize_ligand(
     }
 
 
+# =============================================================================
+# 2b. PEPTIDE PARAMETRIZATION (ff14SB, no antechamber)
+# =============================================================================
+
+def _mol2_peptide_to_pdb(
+        mol2_path: str,
+        pdb_path: str,
+        sequence: List[str],
+) -> Dict[str, Any]:
+    """
+    Convert single-residue mol2 peptide to multi-residue PDB for tleap.
+
+    The mol2 has all atoms in one "LIG1" residue with standard amino acid
+    atom names (N, CA, C, O, CB, etc.). This function segments them into
+    individual residues by detecting backbone N atoms, then writes a PDB
+    with proper residue names and numbering for tleap/ff14SB.
+    """
+    # Parse atoms from mol2
+    atoms = []
+    in_atom = False
+    with open(mol2_path) as f:
+        for line in f:
+            if "@<TRIPOS>ATOM" in line:
+                in_atom = True
+                continue
+            if line.startswith("@<TRIPOS>") and in_atom:
+                break
+            if in_atom and line.strip():
+                parts = line.split()
+                if len(parts) >= 6:
+                    atoms.append({
+                        "name": parts[1],
+                        "x": float(parts[2]),
+                        "y": float(parts[3]),
+                        "z": float(parts[4]),
+                        "type": parts[5],
+                    })
+
+    # Segment into residues by backbone N atoms (N.4 = N-terminal, N.am = internal)
+    residue_starts = []
+    for i, atom in enumerate(atoms):
+        if atom["name"] == "N" and atom["type"] in ("N.4", "N.am", "N.3", "N.pl3"):
+            residue_starts.append(i)
+
+    if len(residue_starts) != len(sequence):
+        return {"success": False,
+                "error": f"Found {len(residue_starts)} backbone N atoms but "
+                         f"sequence has {len(sequence)} residues"}
+
+    # Write PDB
+    with open(pdb_path, "w") as f:
+        atom_serial = 1
+        for res_idx in range(len(sequence)):
+            resname = sequence[res_idx]
+            start = residue_starts[res_idx]
+            end = residue_starts[res_idx + 1] if res_idx + 1 < len(residue_starts) else len(atoms)
+            resnum = res_idx + 1
+
+            for atom in atoms[start:end]:
+                name = atom["name"]
+                # Fix N-terminal H naming: mol2 has H,H2,H3 — AMBER expects H1,H2,H3
+                if res_idx == 0 and name == "H" and atom["type"] == "H":
+                    name = "H1"
+
+                # PDB ATOM format (fixed-width columns)
+                # Atom name: 4 chars, left-justified if starts at col 13 (1-char element)
+                #            or right-justified if 2+ char element
+                if len(name) < 4:
+                    name_field = f" {name:<3s}"
+                else:
+                    name_field = f"{name:<4s}"
+
+                # Element from Sybyl type
+                element = atom["type"].split(".")[0]
+
+                f.write(
+                    f"ATOM  {atom_serial:5d} {name_field:4s} {resname:3s} A{resnum:4d}    "
+                    f"{atom['x']:8.3f}{atom['y']:8.3f}{atom['z']:8.3f}"
+                    f"  1.00  0.00           {element:>2s}\n"
+                )
+                atom_serial += 1
+
+        f.write("TER\n")
+        f.write("END\n")
+
+    return {"success": True, "pdb_path": pdb_path,
+            "n_residues": len(sequence), "n_atoms": len(atoms)}
+
+
+def parametrize_peptide(
+        ligand_mol2: Union[str, Path],
+        output_dir: Union[str, Path],
+        peptide_sequence: List[str],
+) -> Dict[str, Any]:
+    """
+    Prepare peptide ligand for tleap with ff14SB (no antechamber needed).
+
+    Converts single-residue mol2 to multi-residue PDB with standard
+    amino acid names. tleap loads this with protein FF directly.
+
+    Returns:
+        Dict with success, pdb_path
+    """
+    output_dir = Path(output_dir).resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    pdb_path = output_dir / "peptide.pdb"
+
+    result = _mol2_peptide_to_pdb(
+        mol2_path=str(ligand_mol2),
+        pdb_path=str(pdb_path),
+        sequence=peptide_sequence,
+    )
+
+    if not result["success"]:
+        return result
+
+    logger.info(f"  Peptide: {len(peptide_sequence)} residues, {result['n_atoms']} atoms")
+    logger.info(f"  Sequence: {'-'.join(peptide_sequence)}")
+    logger.info(f"  PDB: {pdb_path.name}")
+
+    return {
+        "success": True,
+        "pdb_path": str(pdb_path),
+        "n_residues": len(peptide_sequence),
+        "n_atoms": result["n_atoms"],
+    }
+
+
 def _detect_charge_from_mol2(mol2_path: Union[str, Path]) -> int:
     """Detect net formal charge from mol2 partial charges."""
     text = Path(mol2_path).read_text()
@@ -543,14 +722,16 @@ def _sanitize_pdb_for_tleap(
 
 def build_topologies(
         receptor_pdb: Union[str, Path],
-        ligand_mol2: Union[str, Path],
-        ligand_frcmod: Union[str, Path],
-        output_dir: Union[str, Path],
+        ligand_mol2: Union[str, Path] = None,
+        ligand_frcmod: Union[str, Path] = None,
+        output_dir: Union[str, Path] = ".",
         receptor_ff: str = "ff14SB",
         ligand_ff: str = "gaff2",
         solvate: bool = False,
         solvent_padding: float = 10.0,
         ionic_strength: float = 0.15,
+        ligand_type: str = "small_molecule",
+        ligand_pdb: Optional[Union[str, Path]] = None,
 ) -> Dict[str, Any]:
     """
     Build AMBER topologies with tleap.
@@ -561,14 +742,16 @@ def build_topologies(
 
     Args:
         receptor_pdb:    Protonated receptor PDB (from 00b)
-        ligand_mol2:     GAFF2-parametrized ligand mol2
-        ligand_frcmod:   Missing parameters file
+        ligand_mol2:     GAFF2-parametrized ligand mol2 (small_molecule)
+        ligand_frcmod:   Missing parameters file (small_molecule)
         output_dir:      Output directory
         receptor_ff:     Protein force field
         ligand_ff:       Ligand force field
         solvate:         If True, also build solvated system (for MD)
         solvent_padding: TIP3P box padding in Å
         ionic_strength:  NaCl concentration in M
+        ligand_type:     "small_molecule" or "peptide"
+        ligand_pdb:      Peptide PDB for ff14SB (peptide only)
 
     Returns:
         Dict with success and paths to all topology files
@@ -581,19 +764,32 @@ def build_topologies(
     san_fixes = _sanitize_pdb_for_tleap(receptor_pdb, sanitized_pdb)
 
     # --- Gas-phase topologies (always needed for MMPBSA) ---
-    gas_input = TLEAP_GAS_TEMPLATE.format(
-        receptor_ff=receptor_ff,
-        ligand_ff=ligand_ff,
-        ligand_frcmod=str(Path(ligand_frcmod).resolve()),
-        ligand_mol2=str(Path(ligand_mol2).resolve()),
-        receptor_pdb=str(sanitized_pdb),
-        complex_prmtop=str(output_dir / "complex.prmtop"),
-        complex_inpcrd=str(output_dir / "complex.inpcrd"),
-        receptor_prmtop=str(output_dir / "receptor.prmtop"),
-        receptor_inpcrd=str(output_dir / "receptor.inpcrd"),
-        ligand_prmtop=str(output_dir / "ligand.prmtop"),
-        ligand_inpcrd=str(output_dir / "ligand.inpcrd"),
-    )
+    if ligand_type == "peptide":
+        gas_input = TLEAP_GAS_PEPTIDE_TEMPLATE.format(
+            receptor_ff=receptor_ff,
+            ligand_pdb=str(Path(ligand_pdb).resolve()),
+            receptor_pdb=str(sanitized_pdb),
+            complex_prmtop=str(output_dir / "complex.prmtop"),
+            complex_inpcrd=str(output_dir / "complex.inpcrd"),
+            receptor_prmtop=str(output_dir / "receptor.prmtop"),
+            receptor_inpcrd=str(output_dir / "receptor.inpcrd"),
+            ligand_prmtop=str(output_dir / "ligand.prmtop"),
+            ligand_inpcrd=str(output_dir / "ligand.inpcrd"),
+        )
+    else:
+        gas_input = TLEAP_GAS_TEMPLATE.format(
+            receptor_ff=receptor_ff,
+            ligand_ff=ligand_ff,
+            ligand_frcmod=str(Path(ligand_frcmod).resolve()),
+            ligand_mol2=str(Path(ligand_mol2).resolve()),
+            receptor_pdb=str(sanitized_pdb),
+            complex_prmtop=str(output_dir / "complex.prmtop"),
+            complex_inpcrd=str(output_dir / "complex.inpcrd"),
+            receptor_prmtop=str(output_dir / "receptor.prmtop"),
+            receptor_inpcrd=str(output_dir / "receptor.inpcrd"),
+            ligand_prmtop=str(output_dir / "ligand.prmtop"),
+            ligand_inpcrd=str(output_dir / "ligand.inpcrd"),
+        )
 
     tleap_in = output_dir / "tleap_gas.in"
     tleap_in.write_text(gas_input)
@@ -642,17 +838,28 @@ def build_topologies(
     if solvate:
         extra_ions = f"addionsrand COM Na+ 10\naddionsrand COM Cl- 10"
 
-        solv_input = TLEAP_SOLVATED_TEMPLATE.format(
-            receptor_ff=receptor_ff,
-            ligand_ff=ligand_ff,
-            ligand_frcmod=str(Path(ligand_frcmod).resolve()),
-            ligand_mol2=str(Path(ligand_mol2).resolve()),
-            receptor_pdb=str(sanitized_pdb),
-            solvent_padding=solvent_padding,
-            extra_ions=extra_ions,
-            solvated_prmtop=str(output_dir / "solvated.prmtop"),
-            solvated_inpcrd=str(output_dir / "solvated.inpcrd"),
-        )
+        if ligand_type == "peptide":
+            solv_input = TLEAP_SOLVATED_PEPTIDE_TEMPLATE.format(
+                receptor_ff=receptor_ff,
+                ligand_pdb=str(Path(ligand_pdb).resolve()),
+                receptor_pdb=str(sanitized_pdb),
+                solvent_padding=solvent_padding,
+                extra_ions=extra_ions,
+                solvated_prmtop=str(output_dir / "solvated.prmtop"),
+                solvated_inpcrd=str(output_dir / "solvated.inpcrd"),
+            )
+        else:
+            solv_input = TLEAP_SOLVATED_TEMPLATE.format(
+                receptor_ff=receptor_ff,
+                ligand_ff=ligand_ff,
+                ligand_frcmod=str(Path(ligand_frcmod).resolve()),
+                ligand_mol2=str(Path(ligand_mol2).resolve()),
+                receptor_pdb=str(sanitized_pdb),
+                solvent_padding=solvent_padding,
+                extra_ions=extra_ions,
+                solvated_prmtop=str(output_dir / "solvated.prmtop"),
+                solvated_inpcrd=str(output_dir / "solvated.inpcrd"),
+            )
 
         tleap_solv_in = output_dir / "tleap_solvated.in"
         tleap_solv_in.write_text(solv_input)
@@ -976,10 +1183,16 @@ def strip_solvent_from_trajectory(
 
     n_frames = 0
     for line in proc.stdout.split("\n"):
+        # cpptraj outputs: "Read N frames and processed N frames."
+        match = re.search(r"Read\s+(\d+)\s+frames\s+and\s+processed\s+(\d+)\s+frames", line)
+        if match:
+            n_frames = int(match.group(2))
+            break
+        # Fallback: older cpptraj "Writing N frames"
         if "frames" in line.lower() and "writing" in line.lower():
-            match = re.search(r"(\d+)\s+frames", line)
-            if match:
-                n_frames = int(match.group(1))
+            match2 = re.search(r"(\d+)\s+frames", line)
+            if match2:
+                n_frames = int(match2.group(1))
 
     logger.info(f"  Dry trajectory: {n_frames} frames for MMPBSA")
 
@@ -1029,9 +1242,12 @@ def run_mmpbsa(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     mmpbsa_in = output_dir / "mmpbsa.in"
+    # If n_frames is 0 or negative (parser failure), use 99999 —
+    # MMPBSA.py will automatically stop at the last available frame.
+    safe_endframe = n_frames if n_frames > 0 else 99999
     mmpbsa_input = MMPBSA_INPUT_TEMPLATE.format(
         startframe=1,
-        endframe=n_frames,
+        endframe=safe_endframe,
         interval=1,
         igb=igb,
         saltcon=saltcon,
@@ -1061,7 +1277,7 @@ def run_mmpbsa(
     t0 = time.time()
     proc = subprocess.run(
         cmd, capture_output=True, text=True,
-        timeout=3600,
+        timeout=7200,
         cwd=str(output_dir),
     )
     runtime = time.time() - t0
@@ -1115,6 +1331,8 @@ def run_mmpbsa_decomp(
         mmpbsa_saltcon: float = 0.15,
         md_params: Optional[Dict] = None,
         antechamber_timeout: int = 300,
+        ligand_type: str = "small_molecule",
+        peptide_sequence: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
     Run complete MMPBSA preparation + execution pipeline.
@@ -1182,13 +1400,26 @@ def run_mmpbsa_decomp(
     logger.info("─── Step 2: Ligand Parametrization ───")
 
     param_dir = output_dir / "ligand_params"
-    result_param = parametrize_ligand(
-        ligand_mol2=pose_mol2,
-        output_dir=param_dir,
-        charge_method=charge_method,
-        ligand_ff=ligand_ff,
-        timeout=antechamber_timeout,
-    )
+
+    if ligand_type == "peptide":
+        if not peptide_sequence:
+            return {"success": False,
+                    "error": "peptide_sequence required in campaign_config for ligand_type=peptide"}
+        logger.info(f"  Ligand type: peptide (ff14SB, no antechamber)")
+        result_param = parametrize_peptide(
+            ligand_mol2=pose_mol2,
+            output_dir=param_dir,
+            peptide_sequence=peptide_sequence,
+        )
+    else:
+        logger.info(f"  Ligand type: small_molecule (antechamber + {ligand_ff})")
+        result_param = parametrize_ligand(
+            ligand_mol2=pose_mol2,
+            output_dir=param_dir,
+            charge_method=charge_method,
+            ligand_ff=ligand_ff,
+            timeout=antechamber_timeout,
+        )
     if not result_param["success"]:
         return {"success": False, "error": f"Parametrization: {result_param['error']}"}
 
@@ -1205,17 +1436,27 @@ def run_mmpbsa_decomp(
     do_solvate = (mode == "md")
     md_p = md_params or {}
 
-    result_topo = build_topologies(
-        receptor_pdb=receptor_pdb,
-        ligand_mol2=result_param["mol2_path"],
-        ligand_frcmod=result_param["frcmod_path"],
-        output_dir=topo_dir,
-        receptor_ff=receptor_ff,
-        ligand_ff=ligand_ff,
-        solvate=do_solvate,
-        solvent_padding=md_p.get("solvent_padding", 10.0),
-        ionic_strength=md_p.get("ionic_strength", 0.15),
-    )
+    if ligand_type == "peptide":
+        result_topo = build_topologies(
+            receptor_pdb=receptor_pdb,
+            output_dir=topo_dir,
+            receptor_ff=receptor_ff,
+            solvate=do_solvate,
+            ligand_type="peptide",
+            ligand_pdb=result_param["pdb_path"],
+        )
+    else:
+        result_topo = build_topologies(
+            receptor_pdb=receptor_pdb,
+            ligand_mol2=result_param["mol2_path"],
+            ligand_frcmod=result_param["frcmod_path"],
+            output_dir=topo_dir,
+            receptor_ff=receptor_ff,
+            ligand_ff=ligand_ff,
+            solvate=do_solvate,
+            solvent_padding=md_p.get("solvent_padding", 10.0),
+            ionic_strength=md_p.get("ionic_strength", 0.15),
+        )
     if not result_topo["success"]:
         return {"success": False, "error": f"Topology: {result_topo['error']}"}
 
@@ -1289,7 +1530,7 @@ def run_mmpbsa_decomp(
 
         n_frames = result_strip["n_frames"]
         trajectory_path = result_strip["dry_mdcrd"]
-        solvated_prmtop = result_topo.get("solvated_prmtop")
+        solvated_prmtop = None  # trajectory already stripped by cpptraj
 
     else:
         return {"success": False, "error": f"Unknown mode: {mode}"}

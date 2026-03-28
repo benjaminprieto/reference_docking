@@ -98,25 +98,45 @@ def main():
     output_subdir = mc.get("outputs", {}).get("subdir", "01g_mmpbsa_decomp")
     output_dir = Path(args.output) if args.output else results_base / output_subdir
 
-    # Scored mol2 from 01c
-    docking_dir = results_base / "01c_dock6_run"
+    # Resolve pose source: "docking" (from 01c) or "reference" (crystal mol2)
+    pose_source = cc.get("pose_source", "docking")
     molecule_name = args.name
+    scored_mol2 = None
 
-    if not molecule_name:
-        if docking_dir.exists():
-            mol_dirs = sorted([d for d in docking_dir.iterdir() if d.is_dir()])
-            if mol_dirs:
-                molecule_name = mol_dirs[0].name
-                logger.info(f"Auto-detected molecule: {molecule_name}")
-
-    if not molecule_name:
-        logger.error("No molecule found in 01c_dock6_run/. Run 01c first.")
-        return 1
-
-    scored_mol2 = docking_dir / molecule_name / f"{molecule_name}_scored.mol2"
-    if not scored_mol2.exists():
-        logger.error(f"Scored mol2 not found: {scored_mol2}")
-        return 1
+    if pose_source == "reference":
+        # Use reference mol2 directly (no docking required)
+        ref_key = cc.get("grids", {}).get("binding_site", {}).get("reference_mol2")
+        if ref_key:
+            ref_path = campaign_dir / ref_key
+            if ref_path.exists():
+                scored_mol2 = ref_path
+        if not scored_mol2 or not scored_mol2.exists():
+            # Fallback: 00a output
+            lig_00a = results_base / "00a_ligand_preparation"
+            mol2s = sorted(lig_00a.glob("*.mol2")) if lig_00a.exists() else []
+            if mol2s:
+                scored_mol2 = mol2s[0]
+        if not scored_mol2 or not Path(scored_mol2).exists():
+            logger.error("Reference mol2 not found. Set grids.binding_site.reference_mol2 in campaign_config.")
+            return 1
+        molecule_name = molecule_name or Path(scored_mol2).stem
+        logger.info(f"Pose source: reference ({Path(scored_mol2).name})")
+    else:
+        # From 01c docking results
+        docking_dir = results_base / "01c_dock6_run"
+        if not molecule_name:
+            if docking_dir.exists():
+                mol_dirs = sorted([d for d in docking_dir.iterdir() if d.is_dir()])
+                if mol_dirs:
+                    molecule_name = mol_dirs[0].name
+                    logger.info(f"Auto-detected molecule: {molecule_name}")
+        if not molecule_name:
+            logger.error("No molecule found in 01c_dock6_run/. Run 01c first.")
+            return 1
+        scored_mol2 = docking_dir / molecule_name / f"{molecule_name}_scored.mol2"
+        if not scored_mol2.exists():
+            logger.error(f"Scored mol2 not found: {scored_mol2}")
+            return 1
 
     # Receptor mol2 (from 00b)
     rec_mol2 = results_base / "00b_receptor_preparation" / "rec_charged.mol2"
@@ -135,7 +155,9 @@ def main():
     # =========================================================================
     # MERGE PARAMETERS (YAML + CLI overrides)
     # =========================================================================
-    mode = args.mode or params.get("mode", "single_point")
+    mode = args.mode or cc.get("mmpbsa_mode") or params.get("mode", "single_point")
+    ligand_type = cc.get("ligand_type", "small_molecule")
+    peptide_sequence = cc.get("peptide_sequence")
     pose_selection = params.get("pose_selection", "best_score")
     pose_index = params.get("pose_index", 1)
     receptor_ff = params.get("receptor_ff", "ff14SB")
@@ -166,6 +188,7 @@ def main():
     logger.info(f"Campaign:   {campaign_id}")
     logger.info(f"Molecule:   {molecule_name}")
     logger.info(f"Mode:       {mode}")
+    logger.info(f"Ligand:     {ligand_type}")
     logger.info(f"Scored:     {scored_mol2.name}")
     logger.info(f"Receptor:   {rec_pdb.name}")
     logger.info(f"Output:     {output_dir}")
@@ -189,6 +212,8 @@ def main():
         mmpbsa_saltcon=mmpbsa_saltcon,
         md_params=md_params,
         antechamber_timeout=antechamber_timeout,
+        ligand_type=ligand_type,
+        peptide_sequence=peptide_sequence,
     )
 
     if not result.get("success"):

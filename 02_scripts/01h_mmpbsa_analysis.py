@@ -120,6 +120,27 @@ def main():
         logger.info(f"Detected 01g mode: {plog.get('mode')} "
                      f"({plog.get('n_frames', '?')} frames)")
 
+    # Auto-detect multi-frame from DECOMP Std.Dev values
+    if is_single_frame and decomp_file.exists():
+        with open(decomp_file) as f:
+            decomp_text = f.read()
+        in_deltas = False
+        for line in decomp_text.split("\n"):
+            if "DELTAS:" in line:
+                in_deltas = True
+                continue
+            if in_deltas and line.strip() and not line.startswith(",") and not line.startswith("Residue"):
+                parts = line.split(",")
+                if len(parts) >= 4:
+                    try:
+                        std_dev = float(parts[3])
+                        if std_dev > 0.001:
+                            is_single_frame = False
+                            logger.info(f"  Auto-detected multi-frame from DECOMP (Std.Dev > 0)")
+                            break
+                    except (ValueError, IndexError):
+                        continue
+
     # Footprint CSV (auto-resolve from 04b)
     footprint_csv = args.footprint_csv
     compare_fp = params.get("compare_footprint", True) and not args.no_compare_footprint

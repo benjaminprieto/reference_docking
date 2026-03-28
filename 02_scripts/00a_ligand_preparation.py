@@ -53,8 +53,14 @@ def main():
     output_dir = args.output or str(Path("05_results") / campaign_id / "00a_ligand_preparation")
 
     # Reference mol2
-    ref_key = cc.get("reference_mol2", "reference/UDX.mol2")
-    reference_mol2 = str(campaign_dir / ref_key) if (campaign_dir / ref_key).exists() else None
+    ref_key = cc.get("reference_mol2")
+    if not ref_key:
+        ref_key = cc.get("grids", {}).get("binding_site", {}).get("reference_mol2")
+    reference_mol2 = None
+    if ref_key:
+        ref_path = campaign_dir / ref_key
+        if ref_path.exists():
+            reference_mol2 = str(ref_path)
     if not reference_mol2:
         # Auto-detect in reference/
         ref_dir = campaign_dir / "reference"
@@ -71,7 +77,12 @@ def main():
     if rec_path.exists():
         pdb_path = str(rec_path)
 
-    ligand_name = params.get("ligand_name", "UDX")
+    # Derive ligand_name: campaign_config > reference mol2 stem > config YAML
+    ligand_name = cc.get("ligand_name")
+    if not ligand_name and reference_mol2:
+        ligand_name = Path(reference_mol2).stem
+    if not ligand_name:
+        ligand_name = params.get("ligand_name", "UDX")
     strategy = args.strategy or params.get("strategy", "direct")
     docking_ph = cc.get("docking_ph", 7.2)
 

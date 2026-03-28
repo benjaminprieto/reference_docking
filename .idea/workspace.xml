@@ -5,63 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e52ab46b-93f7-42a1-b34f-2f429c33d94e" name="Changes" comment="prrimer">
-      <change afterPath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/mmpbsa_analysis.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/mmpbsa_decomp.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_src/reference_docking/m06_pharmit/pharmit_pharmacophore.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_src/reference_docking/m06_pharmit/pharmit_zone_selector.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_scripts/01g_mmpbsa_decomp.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_scripts/01h_mmpbsa_analysis.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_scripts/06a_pharmit_pharmacophore.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_scripts/06b_pharmit_zone_selector.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/03_configs/01g_mmpbsa_decomp.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/03_configs/01h_mmpbsa_analysis.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/03_configs/06a_pharmit_pharmacophore.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/03_configs/06b_pharmit_zone_selector.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/04_data/campaigns/SD1_reference_pH63/receptor/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/04_data/campaigns/SD1_reference_pH63/reference/SD1.mol2" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/04_data/campaigns/UDX_reference_pH63/campaign_config.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/04_data/campaigns/UDX_reference_pH63/grids/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/04_data/campaigns/UDX_reference_pH63/molecules/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/04_data/campaigns/UDX_reference_pH63/receptor/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/04_data/campaigns/UDX_reference_pH63/receptor/XT1_6EJ7.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/01_src/reference_docking/m00_preparation/ligand_preparation.py" beforeDir="false" afterPath="$PROJECT_DIR$/01_src/reference_docking/m00_preparation/ligand_preparation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/dock6_runner.py" beforeDir="false" afterPath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/dock6_runner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/footprint_rescore.py" beforeDir="false" afterPath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/footprint_rescore.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/grid_generation.py" beforeDir="false" afterPath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/grid_generation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/01_src/reference_docking/m04_dock6_analysis/footprint_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/01_src/reference_docking/m04_dock6_analysis/footprint_analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/01_src/reference_docking/m04_dock6_analysis/footprint_rescoring.py" beforeDir="false" afterPath="$PROJECT_DIR$/01_src/reference_docking/m04_dock6_analysis/footprint_rescoring.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/mmpbsa_decomp.py" beforeDir="false" afterPath="$PROJECT_DIR$/01_src/reference_docking/m01_docking/mmpbsa_decomp.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/02_scripts/00a_ligand_preparation.py" beforeDir="false" afterPath="$PROJECT_DIR$/02_scripts/00a_ligand_preparation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/02_scripts/00b_receptor_preparation.py" beforeDir="false" afterPath="$PROJECT_DIR$/02_scripts/00b_receptor_preparation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/02_scripts/00d_binding_site_definition.py" beforeDir="false" afterPath="$PROJECT_DIR$/02_scripts/00d_binding_site_definition.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/02_scripts/01b_grid_generation.py" beforeDir="false" afterPath="$PROJECT_DIR$/02_scripts/01b_grid_generation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/02_scripts/01c_dock6_run.py" beforeDir="false" afterPath="$PROJECT_DIR$/02_scripts/01c_dock6_run.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/02_scripts/01d_footprint_rescore.py" beforeDir="false" afterPath="$PROJECT_DIR$/02_scripts/01d_footprint_rescore.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/02_scripts/01e_score_collection.py" beforeDir="false" afterPath="$PROJECT_DIR$/02_scripts/01e_score_collection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/02_scripts/01f_gbsa_rescore.py" beforeDir="false" afterPath="$PROJECT_DIR$/02_scripts/01f_gbsa_rescore.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/02_scripts/03a_plip_interaction_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/02_scripts/03a_plip_interaction_analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/02_scripts/04b_footprint_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/02_scripts/04b_footprint_analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/03_configs/00a_ligand_preparation.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/03_configs/00a_ligand_preparation.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/03_configs/00b_receptor_preparation.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/03_configs/00b_receptor_preparation.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/03_configs/00d_binding_site_definition.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/03_configs/00d_binding_site_definition.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/03_configs/01b_grid_generation.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/03_configs/01b_grid_generation.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/03_configs/01c_dock6_run.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/03_configs/01c_dock6_run.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/03_configs/01d_footprint_rescore.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/03_configs/01d_footprint_rescore.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/03_configs/01f_gbsa_rescore.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/03_configs/01f_gbsa_rescore.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/03_configs/03a_plip_interaction_analysis.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/03_configs/03a_plip_interaction_analysis.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/03_configs/04b_footprint_analysis.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/03_configs/04b_footprint_analysis.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/campaign_config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/04_data/campaigns/SD1_reference_pH63/campaign_config.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/grids/.gitkeep" beforeDir="false" afterPath="$PROJECT_DIR$/01_src/reference_docking/m06_pharmit/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/molecules/.gitkeep" beforeDir="false" afterPath="$PROJECT_DIR$/04_data/campaigns/SD1_reference_pH63/grids/.gitkeep" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/receptor/.gitkeep" beforeDir="false" afterPath="$PROJECT_DIR$/04_data/campaigns/SD1_reference_pH63/molecules/.gitkeep" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/receptor/XT1_6EJ7.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/04_data/campaigns/SD1_reference_pH63/receptor/XT1_6EJ7.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/reference/UDX.mol2" beforeDir="false" afterPath="$PROJECT_DIR$/04_data/campaigns/UDX_reference_pH63/reference/UDX.mol2" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/04_data/campaign/UDX_reference_pH63/reference/pharmit.json" beforeDir="false" afterPath="$PROJECT_DIR$/04_data/campaigns/UDX_reference_pH63/reference/pharmit.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CLAUDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/CLAUDE.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/02_scripts/01g_mmpbsa_decomp.py" beforeDir="false" afterPath="$PROJECT_DIR$/02_scripts/01g_mmpbsa_decomp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/02_scripts/01h_mmpbsa_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/02_scripts/01h_mmpbsa_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/04_data/campaigns/SD1_reference_pH63/campaign_config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/04_data/campaigns/SD1_reference_pH63/campaign_config.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/04_data/campaigns/UDX_reference_pH63/campaign_config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/04_data/campaigns/UDX_reference_pH63/campaign_config.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_pipeline.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run_pipeline.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_pipeline.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,18 +30,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "benjaminprieto"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;benjaminprieto&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/benjaminprieto/reference_docking.git",
-    "accountId": "2433f814-032a-47dd-a3a2-d19c4fe11d05"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/benjaminprieto/reference_docking.git&quot;,
+    &quot;accountId&quot;: &quot;2433f814-032a-47dd-a3a2-d19c4fe11d05&quot;
   }
-}]]></component>
+}</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/01_src/reference_docking/m06_pharmit/pharmit_zone_selector.py" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -109,13 +61,14 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "WebServerToolWindowPanel.toolwindow.highlight.mappings": "true",
     "WebServerToolWindowPanel.toolwindow.highlight.symlinks": "true",
     "WebServerToolWindowPanel.toolwindow.show.date": "false",
     "WebServerToolWindowPanel.toolwindow.show.permissions": "false",
     "WebServerToolWindowPanel.toolwindow.show.size": "false",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/benja/PycharmProjects/reference_docking/04_data/campaigns",
+    "last_opened_file_path": "C:/Users/benja/PycharmProjects/reference_docking",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -149,7 +102,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1774473771985</updated>
-      <workItem from="1774473773018" duration="43934000" />
+      <workItem from="1774473773018" duration="67789000" />
+      <workItem from="1774697432934" duration="455000" />
     </task>
     <task id="LOCAL-00001" summary="prrimer">
       <option name="closed" value="true" />
@@ -183,7 +137,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774489232375</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="prrimer">
+      <option name="closed" value="true" />
+      <created>1774626880251</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1774626880251</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

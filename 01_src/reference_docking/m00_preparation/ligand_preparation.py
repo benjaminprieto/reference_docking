@@ -187,10 +187,13 @@ def prepare_from_mol2(
     if pdb_path and Path(pdb_path).exists():
         validation = validate_coordinates(str(ref), pdb_path, ligand_name)
         result["coord_validation"] = validation
-        if validation["match"]:
-            logger.info(f"  ✓ Coordinates match PDB (max dev: {validation['max_deviation_A']}Å)")
+        if validation.get("max_deviation_A") is not None:
+            if validation["max_deviation_A"] > 0.5:
+                logger.warning(f"  Warning: Coordinate mismatch! Max deviation: {validation['max_deviation_A']}A")
+            else:
+                logger.info(f"  Coordinates match PDB (max dev: {validation['max_deviation_A']}A)")
         else:
-            logger.warning(f"  ⚠ Coordinate mismatch! Max deviation: {validation['max_deviation_A']}Å")
+            logger.info(f"  No HETATM reference found in PDB for coordinate validation")
 
     return result
 
@@ -410,13 +413,13 @@ def run_ligand_preparation(
         with open(report_path, "w") as f:
             f.write(f"Coordinate Validation: {ligand_name}\n")
             f.write(f"{'=' * 40}\n")
-            f.write(f"Match: {val['match']}\n")
-            f.write(f"Heavy atoms (mol2): {val['n_mol2_heavy']}\n")
-            f.write(f"Heavy atoms (PDB):  {val['n_pdb_heavy']}\n")
-            f.write(f"Matched:            {val['n_matched']}\n")
-            f.write(f"Max deviation:      {val['max_deviation_A']} Å\n")
-            f.write(f"Mean deviation:     {val['mean_deviation_A']} Å\n")
-            f.write(f"Tolerance:          {val['tolerance']} Å\n")
+            f.write(f"Match: {val.get('match', 'N/A')}\n")
+            f.write(f"Heavy atoms (mol2): {val.get('n_mol2_heavy', 'N/A')}\n")
+            f.write(f"Heavy atoms (PDB):  {val.get('n_pdb_heavy', 'N/A')}\n")
+            f.write(f"Matched:            {val.get('n_matched', 'N/A')}\n")
+            f.write(f"Max deviation:      {val.get('max_deviation_A', 'N/A')}\n")
+            f.write(f"Mean deviation:     {val.get('mean_deviation_A', 'N/A')}\n")
+            f.write(f"Tolerance:          {val.get('tolerance', 'N/A')}\n")
         logger.info(f"  Saved: {report_path}")
 
     if result.get("success"):

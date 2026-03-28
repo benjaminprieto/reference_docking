@@ -14,6 +14,10 @@
 # --- Identity ---
 campaign_id: "SD1_reference_pH63"
 description: "Example docking campaign"
+pose_source: "reference"
+ligand_type: "peptide"
+peptide_sequence: ["ALA", "ALA", "GLU", "GLY", "SER", "GLY", "GLU", "GLN", "ASP"]
+mmpbsa_mode: "md"
 
 # --- Receptor ---
 receptor:

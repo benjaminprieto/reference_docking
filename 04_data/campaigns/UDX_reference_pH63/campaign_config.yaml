@@ -10,6 +10,9 @@
 # --- Identity ---
 campaign_id: "UDX_reference_pH63"
 description: "UDX crystal ligand rigid re-docking at pH 6.3 (Golgi)"
+pose_source: "docking"
+ligand_type: "small_molecule"
+mmpbsa_mode: "md"
 
 # --- Receptor ---
 receptor:
